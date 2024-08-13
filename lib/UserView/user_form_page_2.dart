@@ -1,5 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:fluttersip/UserView/form_update.dart';
+import 'package:fluttersip/UserView/user_form_page.dart'; // Import UserFormPage1
 
 class UserFormPage2 extends StatefulWidget {
   final Map<String, String?> combinedValues;
@@ -56,47 +58,11 @@ class _UserFormPage2State extends State<UserFormPage2> {
 
   @override
   Widget build(BuildContext context) {
-    return SingleChildScrollView(
-      padding: const EdgeInsets.all(16.0),
-      child: Column(
-        children: <Widget>[
-          Container(
-            padding: const EdgeInsets.all(16.0),
-            decoration: BoxDecoration(
-              border: Border.all(color: Colors.blueGrey),
-              borderRadius: BorderRadius.circular(12.0),
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const Text(
-                  'Kategori :',
-                  style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                const SizedBox(height: 16.0),
-                Column(
-                  children: firstOptions.map((option) {
-                    return RadioListTile<String>(
-                      title: Text(option),
-                      value: option,
-                      groupValue: _selectedFirstCharacter,
-                      onChanged: (value) {
-                        setState(() {
-                          _selectedFirstCharacter = value;
-                          _selectedSecondCharacter = null; // Reset second character
-                        });
-                      },
-                    );
-                  }).toList(),
-                ),
-              ],
-            ),
-          ),
-          const SizedBox(height: 16.0),
-          if (_selectedFirstCharacter != null && secondOptions[_selectedFirstCharacter!] != null)
+    return Scaffold(
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          children: <Widget>[
             Container(
               padding: const EdgeInsets.all(16.0),
               decoration: BoxDecoration(
@@ -104,27 +70,75 @@ class _UserFormPage2State extends State<UserFormPage2> {
                 borderRadius: BorderRadius.circular(12.0),
               ),
               child: Column(
-                children: secondOptions[_selectedFirstCharacter!]!.map((option) {
-                  return RadioListTile<String>(
-                    title: Text(option),
-                    value: option,
-                    groupValue: _selectedSecondCharacter,
-                    onChanged: (value) {
-                      setState(() {
-                        _selectedSecondCharacter = value;
-                      });
-                    },
-                  );
-                }).toList(),
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text(
+                    'Category:',
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  const SizedBox(height: 16.0),
+                  Column(
+                    children: firstOptions.map((option) {
+                      return RadioListTile<String>(
+                        title: Text(option),
+                        value: option,
+                        groupValue: _selectedFirstCharacter,
+                        onChanged: (value) {
+                          setState(() {
+                            _selectedFirstCharacter = value;
+                            _selectedSecondCharacter = null; // Reset second character
+                          });
+                        },
+                      );
+                    }).toList(),
+                  ),
+                ],
               ),
             ),
-          const SizedBox(height: 16.0),
-          ElevatedButton(
-            onPressed: _saveSelection,
-            child: const Text('Save All Selections'),
-          ),
-        ],
+            const SizedBox(height: 16.0),
+            if (_selectedFirstCharacter != null && secondOptions[_selectedFirstCharacter!] != null)
+              Container(
+                padding: const EdgeInsets.all(16.0),
+                decoration: BoxDecoration(
+                  border: Border.all(color: Colors.blueGrey),
+                  borderRadius: BorderRadius.circular(12.0),
+                ),
+                child: Column(
+                  children: secondOptions[_selectedFirstCharacter!]!.map((option) {
+                    return RadioListTile<String>(
+                      title: Text(option),
+                      value: option,
+                      groupValue: _selectedSecondCharacter,
+                      onChanged: (value) {
+                        setState(() {
+                          _selectedSecondCharacter = value;
+                        });
+                      },
+                    );
+                  }).toList(),
+                ),
+              ),
+            const SizedBox(height: 16.0),
+            ElevatedButton(
+              onPressed: _saveSelection,
+              child: const Text('Save All Selections'),
+            ),
+
+          ],
+        ),
       ),
+      
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          Navigator.pop(context); // Navigate back to UserFormPage1
+        },
+        child: const Icon(Icons.navigate_before),
+        backgroundColor: Colors.blue,
+      ),
+      floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
     );
   }
 }
