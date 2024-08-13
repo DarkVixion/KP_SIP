@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttersip/UserView/user_home_page.dart';
 import 'package:fluttersip/UserView/user_form_page.dart';
@@ -15,6 +16,23 @@ class UserPekaPage extends StatefulWidget {
 class _UserPekaPageState extends State<UserPekaPage> {
   int _selectedIndex = 0;
   final String? userId = FirebaseAuth.instance.currentUser?.uid;
+  final String targetQuestionId = "Tipe Observasi"; // The question ID to filter by
+
+  @override
+  void initState() {
+    super.initState();
+  }
+
+  Future<String?> _getImageUrl(String imagePath) async {
+    try {
+      final ref = FirebaseStorage.instance.ref().child(imagePath);
+      final url = await ref.getDownloadURL();
+      return url;
+    } catch (e) {
+      print('Error loading image: $e');
+      return null;
+    }
+  }
 
   void _onItemTapped(int index) {
     setState(() {
@@ -39,13 +57,15 @@ class _UserPekaPageState extends State<UserPekaPage> {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.blue[400],
-        title:const Text('Daftar PEKA Saya',
-        textAlign: TextAlign.center,),
+        title: const Text('Daftar PEKA Saya', textAlign: TextAlign.center),
         automaticallyImplyLeading: false,
-
       ),
       body: StreamBuilder<QuerySnapshot>(
-        stream: FirebaseFirestore.instance.collection('observations').where('userId', isEqualTo: userId).orderBy('timestamp', descending: false).snapshots(),
+        stream: FirebaseFirestore.instance
+            .collection('observations')
+            .where('userId', isEqualTo: userId)
+            .orderBy('timestamp', descending: false)
+            .snapshots(),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(child: CircularProgressIndicator());
@@ -68,8 +88,12 @@ class _UserPekaPageState extends State<UserPekaPage> {
               var doc = documents[index];
               var answers = List<Map<String, dynamic>>.from(doc['answers']);
 
-              // Sort answers by questionId
-              answers.sort((a, b) => a['questionId'].compareTo(b['questionId']));
+              // Filter answers by targetQuestionId
+              var filteredAnswers = answers.where((answer) => answer['questionId'] == targetQuestionId).toList();
+
+              if (filteredAnswers.isEmpty) {
+                return Container(); // Skip this item if there are no relevant answers
+              }
 
               return Container(
                 padding: const EdgeInsets.all(16.0),
@@ -82,38 +106,82 @@ class _UserPekaPageState extends State<UserPekaPage> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                      'Timestamp: ${doc['timestamp']?.toDate().toString() ?? 'No timestamp'}',
-                      style: TextStyle(
-                        fontSize: 16,
-                        color: Colors.grey[700],
-                      ),
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: filteredAnswers.map((answer) {
+                        return Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 4.0),
+                          child: FutureBuilder<String?>(
+                            future: _getImageUrl('adminprofile.jpg'), // Static image path
+                            builder: (context, imageSnapshot) {
+                              if (imageSnapshot.connectionState == ConnectionState.waiting) {
+                                return const CircularProgressIndicator();
+                              }
+
+                              if (imageSnapshot.hasError) {
+                                return Text('Error loading image: ${imageSnapshot.error}');
+                              }
+
+                              if (imageSnapshot.hasData && imageSnapshot.data != null) {
+                                return Row(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Expanded(
+                                      child: Image.network(
+                                        imageSnapshot.data!,
+                                        height: 100, // Adjust size as needed
+                                        width: 100, // Fixed width
+                                        fit: BoxFit.cover,
+                                      ),
+                                    ),
+                                    const SizedBox(width: 8.0), // Space between image and text
+                                    Expanded(
+                                      child: Text(
+                                        '${answer['answer']}',
+                                        style: const TextStyle(fontSize: 16),
+                                      ),
+                                    ),
+                                  ],
+                                );
+                              } else {
+                                return Row(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Expanded(
+                                      child: Container(
+                                        width: 100, // Placeholder width for alignment
+                                        height: 100,
+                                        color: Colors.grey[200], // Placeholder color
+                                      ),
+                                    ),
+                                    const SizedBox(width: 8.0), // Space between image and text
+                                    Expanded(
+                                      child: Text(
+                                        '${answer['answer']}',
+                                        style: const TextStyle(fontSize: 16),
+                                      ),
+                                    ),
+                                  ],
+                                );
+                              }
+                            },
+                          ),
+                        );
+                      }).toList(),
                     ),
                     const SizedBox(height: 8.0),
-                    // Use SingleChildScrollView to handle overflow
-                    SingleChildScrollView(
-                      scrollDirection: Axis.vertical,
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: answers.map((answer) {
-                          return Padding(
-                            padding: const EdgeInsets.symmetric(vertical: 4.0),
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                Expanded(
-                                  child: Text(
-                                    'Pertanyaan: ${answer['questionId']} - Answer: ${answer['answer']}',
-                                    style: const TextStyle(
-                                      fontSize: 16,
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            ),
-                          );
-                        }).toList(),
-                      ),
+                    // Display timestamp
+                    Column(
+                      mainAxisAlignment: MainAxisAlignment.end,
+                      children: [
+                        Text(
+                          '${doc['timestamp']?.toDate().toString() ?? 'No timestamp'}',
+                          style: TextStyle(
+                            fontSize: 16,
+                            color: Colors.grey[700],
+                          ),
+                        ),
+                      ],
                     ),
                   ],
                 ),
