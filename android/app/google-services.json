@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "496296895935",
+    "project_id": "fluttersip-14adb",
+    "storage_bucket": "fluttersip-14adb.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:496296895935:android:417ea31d75ac14851b6d0a",
+        "android_client_info": {
+          "package_name": "com.example.flutter"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDaiT5vbQhY7vf_QMrsBE4SUBFQjdVYUis"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:496296895935:android:91c652a70fdb8f811b6d0a",
+        "android_client_info": {
+          "package_name": "com.example.fluttersip"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDaiT5vbQhY7vf_QMrsBE4SUBFQjdVYUis"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
