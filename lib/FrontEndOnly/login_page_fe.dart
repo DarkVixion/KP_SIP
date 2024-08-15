@@ -1,16 +1,19 @@
-import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:fluttersip/forgot_pw_page.dart';
-import 'package:fluttersip/service/firebase_options.dart';
-import 'package:fluttersip/service/global_service.dart';
 import 'package:provider/provider.dart';
-import 'main.dart';
+import 'package:fluttersip/service/firebase_options.dart';
+import 'package:fluttersip/main.dart';
+import 'package:fluttersip/FrontEndOnly/Service/global_service_fe.dart';
+import 'package:fluttersip/FrontEndOnly/forgot_pw_page_fe.dart';
 
-void main() async {
+
+
+
+void login() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
-  final globalState = GlobalState();
+  final globalState = GlobalStateFE();
   await globalState.initialize();  // Initialize UserService
   runApp(
     ChangeNotifierProvider(
@@ -20,14 +23,14 @@ void main() async {
 }
 
 
-class LoginPage extends StatefulWidget {
-  const LoginPage({super.key});
+class LoginPageFE extends StatefulWidget {
+  const LoginPageFE({super.key});
 
   @override
-  State<LoginPage> createState() => _LoginPageState();
+  State<LoginPageFE> createState() => _LoginPageFEState();
 }
 
-class _LoginPageState extends State<LoginPage> {
+class _LoginPageFEState extends State<LoginPageFE> {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
 
@@ -67,7 +70,7 @@ class _LoginPageState extends State<LoginPage> {
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 const Text(
-                  'PEKA UPER',
+                  'PEKA UPER FE',
                   style: TextStyle(
                     fontWeight: FontWeight.bold,
                     fontSize: 40,
@@ -137,7 +140,7 @@ class _LoginPageState extends State<LoginPage> {
                             context,
                             MaterialPageRoute(
                               builder: (context) {
-                                return const ForgotPasswordPage();
+                                return const ForgotPasswordPageFE();
                               },
                             ),
                           );
