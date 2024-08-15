@@ -59,16 +59,24 @@ class _UserFormPage1FEState extends State<UserFormPage1FE> {
                 padding: const EdgeInsets.all(16.0),
                 decoration: BoxDecoration(
                   border: Border.all(color: Colors.blueGrey),
-                  borderRadius: BorderRadius.circular(12.0),
+                  borderRadius: BorderRadius.circular(0),
                 ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text(
-                      'Tipe Observasi : ',
-                      style: TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
+                    const Text.rich(
+                      TextSpan(
+                          text: 'Tipe Observasi',
+                          style: TextStyle(
+                              color: Colors.black,
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold
+                          ),children: <TextSpan>[
+                        TextSpan(
+                          text: ' *',
+                          style: TextStyle(color: Colors.red, fontSize: 18),
+                        ),
+                      ]
                       ),
                     ),
                     const SizedBox(height: 16.0), // Space between title and options
@@ -86,23 +94,29 @@ class _UserFormPage1FEState extends State<UserFormPage1FE> {
                   ],
                 ),
               ),
-
               const SizedBox(height: 20),
-          
               Container(
                 padding: const EdgeInsets.all(16.0),
                 decoration: BoxDecoration(
                   border: Border.all(color: Colors.blueGrey),
-                  borderRadius: BorderRadius.circular(12.0),
+                  borderRadius: BorderRadius.circular(0),
                 ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text(
-                      'Kategory / Category',
-                      style: TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
+                    const Text.rich(
+                      TextSpan(
+                          text: 'Kategory / Category',
+                          style: TextStyle(
+                              color: Colors.black,
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold
+                          ),children: <TextSpan>[
+                        TextSpan(
+                          text: ' *',
+                          style: TextStyle(color: Colors.red, fontSize: 18),
+                        ),
+                      ]
                       ),
                     ),
                     const SizedBox(height: 16.0),
@@ -130,16 +144,24 @@ class _UserFormPage1FEState extends State<UserFormPage1FE> {
                   padding: const EdgeInsets.all(16.0),
                   decoration: BoxDecoration(
                     border: Border.all(color: Colors.blueGrey),
-                    borderRadius: BorderRadius.circular(12.0),
+                    borderRadius: BorderRadius.circular(0),
                   ),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(
-                        'Sub-Category $_selectedFirstCharacter',
-                        style: const TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
+                      Text.rich(
+                        TextSpan(
+                            text: 'Sub-Category $_selectedFirstCharacter',
+                            style: const TextStyle(
+                                color: Colors.black,
+                                fontSize: 18,
+                                fontWeight: FontWeight.bold
+                            ),children: const <TextSpan>[
+                          TextSpan(
+                            text: ' *',
+                            style: TextStyle(color: Colors.red, fontSize: 18),
+                          ),
+                        ]
                         ),
                       ),
                       const SizedBox(height: 16.0),
@@ -185,7 +207,7 @@ class _UserFormPage1FEState extends State<UserFormPage1FE> {
                         onPressed: (){
                           Navigator.push(
                               context,
-                              MaterialPageRoute(builder: (context) => UserFormPage2FE())
+                              MaterialPageRoute(builder: (context) => const UserFormPage2FE())
                           );
                         },
                         child: const Text(

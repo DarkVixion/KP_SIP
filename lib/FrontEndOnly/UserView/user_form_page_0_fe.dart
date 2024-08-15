@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:fluttersip/FrontEndOnly/UserView/user_form_page_1_fe.dart';
-
-
-
+import 'package:intl/intl.dart';
 
 
 class UserFormPage0FE extends StatefulWidget {
@@ -15,8 +13,10 @@ class UserFormPage0FE extends StatefulWidget {
 class _UserFormPage0FEState extends State<UserFormPage0FE> {
   String? _selectedValue1; // For first question (radio list)
 
-  final TextEditingController _textController2 = TextEditingController(); // For second question (text input)
-
+  final TextEditingController _textController1 = TextEditingController(); // For second question (text input)
+  final TextEditingController _textController2 = TextEditingController();
+  final TextEditingController _textController3 = TextEditingController();
+  final TextEditingController _textController4 = TextEditingController();
   // Arrays for radio list options
   final List<String> options1 = [
     'Gedung Rektorat', 'Gedung Griya Legita',
@@ -24,13 +24,29 @@ class _UserFormPage0FEState extends State<UserFormPage0FE> {
     'Gedung GOR 2', 'Kantin',
     'Lab Kontainer', 'Lingkungan Universitas Pertamina'];
 
+  DateTime? _selectedDate;
+
+  Future<void> _selectDate(BuildContext context) async {
+    final DateTime? pickedDate = await showDatePicker(
+      context: context,
+      initialDate: _selectedDate ?? DateTime.now(),
+      firstDate: DateTime(2000),
+      lastDate: DateTime(2100),
+    );
+    if (pickedDate != null && pickedDate != _selectedDate) {
+      setState(() {
+        _selectedDate = pickedDate;
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
+
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.blue[700],
-        title: Text(
+        title: const Text(
             'Tambah PEKA'
         ),
       ),
@@ -40,21 +56,200 @@ class _UserFormPage0FEState extends State<UserFormPage0FE> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // First Question - Radio List
               Container(
                 padding: const EdgeInsets.all(16.0),
                 decoration: BoxDecoration(
                   border: Border.all(color: Colors.blueGrey),
-                  borderRadius: BorderRadius.circular(12.0),
+                  borderRadius: BorderRadius.circular(0),
                 ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text(
-                      'lokasi Observasi : ',
-                      style: TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
+                     const Text.rich(
+                      TextSpan(
+                        text: 'Nama Pegawai',
+                        style: TextStyle(
+                            color: Colors.black,
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold
+                        ),children: <TextSpan>[
+                        TextSpan(
+                          text: ' *',
+                          style: TextStyle(color: Colors.red, fontSize: 18),
+                        ),
+                      ]
+                      ),
+                    ),
+                    const SizedBox(height: 16.0), // Space between title and input
+                    TextField(
+                      controller: _textController1,
+                      decoration: const InputDecoration(
+                        labelText: 'Enter text',
+                      ),
+                    ),
+                    const SizedBox(height: 8.0),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 20),
+              Container(
+                padding: const EdgeInsets.all(16.0),
+                decoration: BoxDecoration(
+                  border: Border.all(color: Colors.blueGrey),
+                  borderRadius: BorderRadius.circular(0),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text.rich(
+                      TextSpan(
+                          text: 'Email Pekerja',
+                          style: TextStyle(
+                              color: Colors.black,
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold
+                          ),children: <TextSpan>[
+                        TextSpan(
+                          text: ' *',
+                          style: TextStyle(color: Colors.red, fontSize: 18),
+                        ),
+                      ]
+                      ),
+                    ),
+                    const SizedBox(height: 16.0), // Space between title and input
+                    TextField(
+                      controller: _textController3,
+                      decoration: const InputDecoration(
+                        labelText: 'Enter text',
+                      ),
+                    ),
+                    const SizedBox(height: 8.0),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 20),
+              Container(
+                padding: const EdgeInsets.all(16.0),
+                decoration: BoxDecoration(
+                  border: Border.all(color: Colors.blueGrey),
+                  borderRadius: BorderRadius.circular(0),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text.rich(
+                      TextSpan(
+                          text: 'Nama Fungsi / Prodi',
+                          style: TextStyle(
+                              color: Colors.black,
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold
+                          ),children: <TextSpan>[
+                        TextSpan(
+                          text: ' *',
+                          style: TextStyle(color: Colors.red, fontSize: 18),
+                        ),
+                      ]
+                      ),
+                    ),
+                    const SizedBox(height: 16.0), // Space between title and input
+                    TextField(
+                      controller: _textController4,
+                      decoration: const InputDecoration(
+                        labelText: 'Enter text',
+                      ),
+                    ),
+                    const SizedBox(height: 8.0),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 20),
+              Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  border: Border.all(color: Colors.blueGrey),
+                  borderRadius: BorderRadius.circular(0),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Row(
+                      children: [
+                        Text.rich(
+                          TextSpan(
+                              text: 'Tanggal Observasi',
+                              style: TextStyle(
+                                  color: Colors.black,
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.bold
+                              ),children: <TextSpan>[
+                            TextSpan(
+                              text: ' *',
+                              style: TextStyle(color: Colors.red, fontSize: 18),
+                            ),
+                          ]
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 16.0), // Space between title and picker
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        InkWell(
+                          onTap: () => _selectDate(context),
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(
+                                vertical: 12.0, horizontal: 100.0),
+                            decoration: BoxDecoration(
+                              border: Border.all(color: Colors.blueGrey),
+                              borderRadius: BorderRadius.circular(0),
+                              color: Colors.white,
+                            ),
+                            child: Row(
+                              children: [
+                                const Icon(Icons.calendar_today, color: Colors.blueGrey),
+                                const SizedBox(width: 8.0), // Space between icon and text
+                                Text(
+                                  _selectedDate != null
+                                      ? DateFormat('dd/MM/yyyy').format(_selectedDate!)
+                                      : 'Pilih Tanggal',
+                                  style: const TextStyle(
+                                    fontSize: 16.0,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 20),
+              Container(
+                padding: const EdgeInsets.all(16.0),
+                decoration: BoxDecoration(
+                  border: Border.all(color: Colors.blueGrey),
+                  borderRadius: BorderRadius.circular(0),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text.rich(
+                      TextSpan(
+                          text: 'Lokasi Observasi',
+                          style: TextStyle(
+                              color: Colors.black,
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold
+                          ),children: <TextSpan>[
+                        TextSpan(
+                          text: ' *',
+                          style: TextStyle(color: Colors.red, fontSize: 18),
+                        ),
+                      ]
                       ),
                     ),
                     const SizedBox(height: 16.0), // Space between title and options
@@ -73,22 +268,28 @@ class _UserFormPage0FEState extends State<UserFormPage0FE> {
                 ),
               ),
               const SizedBox(height: 20),
-
-              // Second Question - Text Input with Subtext
               Container(
                 padding: const EdgeInsets.all(16.0),
                 decoration: BoxDecoration(
                   border: Border.all(color: Colors.blueGrey),
-                  borderRadius: BorderRadius.circular(12.0),
+                  borderRadius: BorderRadius.circular(0),
                 ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text(
-                      'Lokasi Spesifik : ',
-                      style: TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
+                    const Text.rich(
+                      TextSpan(
+                          text: 'Lokasi Spesifik',
+                          style: TextStyle(
+                              color: Colors.black,
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold
+                          ),children: <TextSpan>[
+                        TextSpan(
+                          text: ' *',
+                          style: TextStyle(color: Colors.red, fontSize: 18),
+                        ),
+                      ]
                       ),
                     ),
                     const SizedBox(height: 16.0), // Space between title and input
@@ -110,10 +311,6 @@ class _UserFormPage0FEState extends State<UserFormPage0FE> {
                 ),
               ),
               const SizedBox(height: 20),
-
-
-              const SizedBox(height: 20),
-
               //  Display selected values
               // Text('Selected Value for Question 1: ${_selectedValue1 ?? "None"}'),
               // Text('Input Text for Question 2: ${_textController2.text}'),

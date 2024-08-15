@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:fluttersip/FrontEndOnly/Service/image_file_service.dart';
 import 'package:fluttersip/FrontEndOnly/Service/user_service_fe.dart';
-import 'package:fluttersip/FrontEndOnly/UserView/user_form_page_0_fe.dart';
 import 'package:fluttersip/FrontEndOnly/UserView/user_peka_page_fe.dart';
 import 'package:fluttersip/FrontEndOnly/profile_page_fe.dart';
 import 'package:toggle_switch/toggle_switch.dart';
@@ -73,10 +73,10 @@ class _UserHomePageFEState extends State<UserHomePageFE> {
           IconButton(
             icon: const Icon(Icons.notifications),
             onPressed: () {
-              // Navigator.push(
-              //   context,
-              //   MaterialPageRoute(builder: (context) => UserFormPage0FE()),
-              // );
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => Test()),
+              );
             },
           ),
         ],
@@ -101,95 +101,100 @@ class _UserHomePageFEState extends State<UserHomePageFE> {
           },
         ),
       ),
-      body: SingleChildScrollView(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    userService.userName ?? "Loading...",
-                    style: const TextStyle(
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  Text(
-                    userService.userRole ?? "Loading...",
-                    style: const TextStyle(fontSize: 16),
-                  ),
-                  const SizedBox(height: 16),
-                  const Text(
-                    'Peka Saya FE',
-                    style: TextStyle(
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.end,
+      body: StreamBuilder<QuerySnapshot>(
+        stream: null,
+        builder: (context, snapshot) {
+          return SingleChildScrollView(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Column(
+                      Text(
+                        userService.userName ?? "Loading...",
+                        style: const TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      Text(
+                        userService.userRole ?? "Loading...",
+                        style: const TextStyle(fontSize: 16),
+                      ),
+                      const SizedBox(height: 16),
+                      const Text(
+                        'Peka Saya FE',
+                        style: TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      const SizedBox(height: 16),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.end,
                         children: [
-                          ToggleSwitch(
-                            customWidths: const [100.0, 100.0],
-                            cornerRadius: 20.0,
-                            activeBgColors: const [
-                              [Colors.redAccent],
-                              [Colors.redAccent]
+                          Column(
+                            children: [
+                              ToggleSwitch(
+                                customWidths: const [100.0, 100.0],
+                                cornerRadius: 0,
+                                activeBgColors: const [
+                                  [Colors.redAccent],
+                                  [Colors.redAccent]
+                                ],
+                                activeFgColor: Colors.white,
+                                inactiveBgColor: Colors.grey,
+                                inactiveFgColor: Colors.white,
+                                totalSwitches: 2,
+                                labels: const ['Bulan Ini', 'Minggu Ini'],
+                              ),
                             ],
-                            activeFgColor: Colors.white,
-                            inactiveBgColor: Colors.grey,
-                            inactiveFgColor: Colors.white,
-                            totalSwitches: 2,
-                            labels: const ['Bulan Ini', 'Minggu Ini'],
                           ),
                         ],
                       ),
+                      const SizedBox(height: 16),
+                      Row(
+                        children: [
+                          Expanded(
+                            child: _PekaCard(
+                              title: 'Total PEKA',
+                              icon: const Icon(Icons.layers),
+                              count: totalPekaCount,
+                            ),
+                          ),
+                          const SizedBox(width: 16),
+                          const Expanded(
+                            child: _PekaCard(
+                              title: 'On Progress',
+                              icon: Icon(Icons.access_time),
+                              count: 0,
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 16),
+                      const Row(
+                        children: [
+                          Expanded(
+                            child: _PekaCard(
+                              title: 'Close',
+                              icon: Icon(Icons.checklist),
+                              count: 0,
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 16),
                     ],
                   ),
-                  const SizedBox(height: 16),
-                  Row(
-                    children: [
-                      Expanded(
-                        child: _PekaCard(
-                          title: 'Total PEKA',
-                          icon: const Icon(Icons.layers),
-                          count: totalPekaCount,
-                        ),
-                      ),
-                      const SizedBox(width: 16),
-                      const Expanded(
-                        child: _PekaCard(
-                          title: 'On Progress',
-                          icon: Icon(Icons.access_time),
-                          count: 0,
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 16),
-                  const Row(
-                    children: [
-                      Expanded(
-                        child: _PekaCard(
-                          title: 'Close',
-                          icon: Icon(Icons.checklist),
-                          count: 0,
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 16),
-                ],
-              ),
+                ),
+              ],
             ),
-          ],
-        ),
+          );
+        }
       ),
       bottomNavigationBar: BottomNavigationBar(
         items: const [

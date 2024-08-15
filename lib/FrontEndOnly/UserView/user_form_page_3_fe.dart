@@ -4,27 +4,6 @@ import 'dart:io';
 
 import 'package:fluttersip/FrontEndOnly/UserView/user_peka_page_fe.dart';
 
-void main() {
-  runApp(const MyApp());
-}
-
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      theme: ThemeData(
-        useMaterial3: true,
-      ),
-      home: Scaffold(
-        appBar: AppBar(title: const Text('RadioListTile Sample')),
-        body: const UserFormPage3FE(),
-      ),
-    );
-  }
-}
-
 class UserFormPage3FE extends StatefulWidget {
   const UserFormPage3FE({super.key});
 
@@ -59,16 +38,24 @@ class _UserFormPage3FEState extends State<UserFormPage3FE> {
                 padding: const EdgeInsets.all(16.0),
                 decoration: BoxDecoration(
                   border: Border.all(color: Colors.blueGrey),
-                  borderRadius: BorderRadius.circular(12.0),
+                  borderRadius: BorderRadius.circular(0),
                 ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text(
-                      'Deskripsi Observasi / Observation Description : ',
-                      style: TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
+                    const Text.rich(
+                      TextSpan(
+                          text: 'Deskripsi Observasi / Observation Description',
+                          style: TextStyle(
+                              color: Colors.black,
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold
+                          ),children: <TextSpan>[
+                        TextSpan(
+                          text: ' *',
+                          style: TextStyle(color: Colors.red, fontSize: 18),
+                        ),
+                      ]
                       ),
                     ),
                     const SizedBox(height: 16.0), // Space between title and input
@@ -94,16 +81,24 @@ class _UserFormPage3FEState extends State<UserFormPage3FE> {
                 padding: const EdgeInsets.all(16.0),
                 decoration: BoxDecoration(
                   border: Border.all(color: Colors.blueGrey),
-                  borderRadius: BorderRadius.circular(12.0),
+                  borderRadius: BorderRadius.circular(0),
                 ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text(
-                      'Direction Action (Tindakan Langsung) : ',
-                      style: TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
+                    const Text.rich(
+                      TextSpan(
+                          text: 'Direct Action (Tindakan Langsung)',
+                          style: TextStyle(
+                              color: Colors.black,
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold
+                          ),children: <TextSpan>[
+                        TextSpan(
+                          text: ' *',
+                          style: TextStyle(color: Colors.red, fontSize: 18),
+                        ),
+                      ]
                       ),
                     ),
                     const SizedBox(height: 16.0), // Space between title and input
@@ -126,10 +121,10 @@ class _UserFormPage3FEState extends State<UserFormPage3FE> {
               ),
               const SizedBox(height: 20.0),
               Container(
-                padding: const EdgeInsets.all(40.0),
+                padding: const EdgeInsets.all(16.0),
                 decoration: BoxDecoration(
                   border: Border.all(color: Colors.blueGrey),
-                  borderRadius: BorderRadius.circular(12.0),
+                  borderRadius: BorderRadius.circular(0),
                 ),
                 child: const Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -141,8 +136,13 @@ class _UserFormPage3FEState extends State<UserFormPage3FE> {
                         fontWeight: FontWeight.bold,
                       ),
                     ),
-                    SizedBox(height: 16.0),
-                    UploadOrCaptureImage(),
+                    SizedBox(height: 8.0),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        UploadOrCaptureImage(),
+                      ],
+                    ),
                     Text(
                       'Silahkan masukan bukti gambar temuan Anda (jika ada)',
                       style: TextStyle(
@@ -158,16 +158,24 @@ class _UserFormPage3FEState extends State<UserFormPage3FE> {
                 padding: const EdgeInsets.all(16.0),
                 decoration: BoxDecoration(
                   border: Border.all(color: Colors.blueGrey),
-                  borderRadius: BorderRadius.circular(12.0),
+                  borderRadius: BorderRadius.circular(0),
                 ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text(
-                      'Berikan saran anda untuk penggunaan Applikasi ini : ',
-                      style: TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
+                    const Text.rich(
+                      TextSpan(
+                          text: 'Berikan saran anda untuk penggunaan Aplikasi ini',
+                          style: TextStyle(
+                              color: Colors.black,
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold
+                          ),children: <TextSpan>[
+                        TextSpan(
+                          text: ' *',
+                          style: TextStyle(color: Colors.red, fontSize: 18),
+                        ),
+                      ]
                       ),
                     ),
                     const SizedBox(height: 16.0), // Space between title and input
@@ -255,6 +263,7 @@ class _UploadOrCaptureImageState extends State<UploadOrCaptureImage> {
   @override
   Widget build(BuildContext context) {
     return Column(
+      mainAxisAlignment: MainAxisAlignment.center,
       children: [
         if (_image != null) Image.file(_image!),
         if (_file != null) Text("Selected file: ${_file!.path.split('/').last}"),

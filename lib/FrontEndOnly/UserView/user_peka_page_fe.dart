@@ -101,7 +101,7 @@ class _UserPekaPageFEState extends State<UserPekaPageFE> {
                 margin: const EdgeInsets.symmetric(vertical: 8.0),
                 decoration: BoxDecoration(
                   border: Border.all(color: Colors.blueGrey),
-                  borderRadius: BorderRadius.circular(12.0),
+                  borderRadius: BorderRadius.circular(0),
                   color: Colors.white,
                 ),
                 child: Column(
@@ -175,6 +175,12 @@ class _UserPekaPageFEState extends State<UserPekaPageFE> {
                     Row(
                       mainAxisAlignment: MainAxisAlignment.end,
                       children: [
+                        Icon(
+                          Icons.calendar_today, // Choose your preferred icon
+                          color: Colors.grey[700],
+                          size: 18, // Adjust the size as needed
+                        ),
+                        const SizedBox(width: 4),
                         Text(
                           doc['timestamp']?.toDate().toString() ?? 'No timestamp',
                           style: TextStyle(

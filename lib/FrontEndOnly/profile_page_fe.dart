@@ -52,90 +52,218 @@ class _MyProfilePageState extends State<ProfilePageFE> {
     final globalState = Provider.of<GlobalStateFE>(context);
 
     return Scaffold(
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            CircleAvatar(
-              radius: 50,
-              backgroundColor: Colors.blue,
-              backgroundImage: _profileImageUrl != null
-                  ? NetworkImage(_profileImageUrl!)
-                  : null,
-              child: _profileImageUrl == null
-                  ? const Icon(
-                Icons.person,
-                color: Colors.white,
-                size: 50,
-              )
-                  : null,
-            ),
-            const SizedBox(height: 16),
-            Text(
-              globalState.userService.userName ?? "Loading...",
-              style: const TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            const SizedBox(height: 16),
-            ElevatedButton(
-              onPressed: () {
-                // Handle Edit button press
-              },
-              child: const Text('Edit', style: TextStyle(color: Colors.red)),
-            ),
-            const SizedBox(height: 32),
-            // Unit Kerja
-
-            // Account
-            Container(
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                border: Border.all(
-                  color: Colors.grey,
-                  width: 1,
+      body: StreamBuilder<Object>(
+        stream: null,
+        builder: (context, snapshot) {
+          return Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: <Widget>[
+                CircleAvatar(
+                  radius: 50,
+                  backgroundColor: Colors.blue,
+                  backgroundImage: _profileImageUrl != null
+                      ? NetworkImage(_profileImageUrl!)
+                      : null,
+                  child: _profileImageUrl == null
+                      ? const Icon(
+                    Icons.person,
+                    color: Colors.white,
+                    size: 50,
+                  )
+                      : null,
                 ),
-              ),
-              child: const Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: <Widget>[
-                  Text(
-                    'Account',
-                    style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
+                const SizedBox(height: 16),
+                Text(
+                  globalState.userService.userName ?? "Loading...",
+                  style: const TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const SizedBox(height: 16),
+                ElevatedButton(
+                  onPressed: () {
+                    // Handle Edit button press
+                  },
+                  child: const Text('Edit', style: TextStyle(color: Colors.red)),
+                ),
+
+                const SizedBox(height: 32),
+                // Unit Kerja
+                Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Container(
+                    padding: const EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      color: Colors.grey[300],
+
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: <Widget>[
+                        Column(
+                          children: [
+                            Row(mainAxisAlignment: MainAxisAlignment.start,
+                              children: [
+                                Text(
+                                  globalState.userService.userKantor ?? "Loading..." ,
+                                  style: const TextStyle(
+                                    fontSize: 18,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              ],
+                            ),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.end,
+                              children: [
+                                Container(
+                                  padding: const EdgeInsets.only(
+                                      left: 16,right: 16, top: 5,bottom: 5),
+                                  decoration: BoxDecoration(
+                                    color: Colors.red,
+                                  ),
+                                  child: Text(
+                                    globalState.userService.userRole ?? "Loading...",
+                                    style: const TextStyle(
+                                      fontSize: 20,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.start,
+                              children: [
+                                Text(
+                                  globalState.userService.userEmail ?? "Loading..." ,
+                                  style: const TextStyle(
+                                    fontSize: 18,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              ],
+                            ),
+
+                          ],
+                        ),
+                        const SizedBox(height: 16),
+
+                      ],
                     ),
                   ),
-                  SizedBox(height: 16),
-                  ListTile(
-                    leading: Icon(Icons.lock),
-                    title: Text('Change Password'),
-                    trailing: Icon(Icons.arrow_forward_ios),
+                ),
+                // Account
+                Padding(
+                  padding: const EdgeInsets.all(8.0),
+
+                  child: Container(
+                    child: const Column(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      children: [
+                        Text('Account',
+                        style: TextStyle(
+                          fontSize: 24,
+                          fontWeight: FontWeight.bold,
+                        ),),
+                      ],
+                    ),
                   ),
-                  SizedBox(height: 8),
-                  ListTile(
-                    leading: Icon(Icons.notifications),
-                    title: Text('Notification'),
-                    trailing: Icon(Icons.arrow_forward_ios),
+                ),
+                Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Container(
+                    padding: const EdgeInsets.all(16),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: <Widget>[
+                        ElevatedButton(
+                          onPressed: () {},
+                          style: ElevatedButton.styleFrom(
+                            padding: EdgeInsets.zero,
+                            shape: const RoundedRectangleBorder(
+                              borderRadius: BorderRadius.zero, // Square shape
+                            ),
+                          ),
+                          child: Container(
+                            width: double.infinity, // Full width
+                            padding: const EdgeInsets.all(16), // Inner padding
+                            child: const Row(
+                              children: [
+                                Icon(Icons.lock),
+                                SizedBox(width: 16),
+                                Text('Change Password'),
+                                Spacer(),
+                                Icon(Icons.arrow_forward_ios),
+                              ],
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: 10),
+                        ElevatedButton(
+                          onPressed: () {},
+                          style: ElevatedButton.styleFrom(
+                            padding: EdgeInsets.zero,
+                            shape: const RoundedRectangleBorder(
+                              borderRadius: BorderRadius.zero, // Square shape
+                            ),
+                          ),
+                          child: Container(
+                            width: double.infinity, // Full width
+                            padding: const EdgeInsets.all(16), // Inner padding
+                            child: const Row(
+                              children: [
+                                Icon(Icons.notifications),
+                                SizedBox(width: 16),
+                                Text('Notification'),
+                                Spacer(),
+                                Icon(Icons.arrow_forward_ios),
+                              ],
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: 20),
+
+                        ElevatedButton(
+                          onPressed: () async {
+                            await FirebaseAuth.instance.signOut();
+                            Navigator.pushReplacement(
+                              context,
+                              MaterialPageRoute(builder: (context) => const MainPageFE()),
+                            );
+                          },
+                          style: ElevatedButton.styleFrom(
+                            padding: EdgeInsets.zero,
+                            shape: const RoundedRectangleBorder(
+                              borderRadius: BorderRadius.zero, // Square shape
+                            ),
+                          ),
+                          child: Container(
+                            width: double.infinity, // Full width
+                            padding: const EdgeInsets.all(16), // Inner padding
+                            child: const Row(
+                              children: [
+                                Icon(Icons.logout),
+                                SizedBox(width: 16),
+                                Text('Log Out'),
+                                Spacer(),
+                                Icon(Icons.arrow_forward_ios),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
-                ],
-              ),
+                ),
+                const SizedBox(height: 32),
+
+              ],
             ),
-            const SizedBox(height: 32),
-            ElevatedButton(
-              onPressed: () async {
-                await FirebaseAuth.instance.signOut();
-                Navigator.pushReplacement(
-                  context,
-                  MaterialPageRoute(builder: (context) => const MainPageFE()),
-                );
-              },
-              child: const Text('Logout'),
-            ),
-            const SizedBox(height: 16),
-          ],
-        ),
+          );
+        }
       ),
       bottomNavigationBar: BottomNavigationBar(
         items: const [

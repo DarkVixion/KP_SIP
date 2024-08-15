@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:fluttersip/service/login_service.dart';
 import 'package:provider/provider.dart';
 import 'package:fluttersip/service/firebase_options.dart';
 import 'package:fluttersip/main.dart';
@@ -180,10 +181,14 @@ class _LoginPageFEState extends State<LoginPageFE> {
                     ),
                   ),
                 ),
-                // ElevatedButton(onPressed: () async {
-                //   dynamic sesuatu = await LoginService().loginAccount("test@gmail.com", "user123");
-                // }, child: const Text('yey')
-                // )
+                ElevatedButton(onPressed: () async {
+                  dynamic sesuatu = await LoginService().loginAccount("test@gmail.com", "user123");
+                }, child: const Text('yey')
+                ),
+                ElevatedButton(onPressed: () async {
+                  dynamic sesuati = await LoginService().loginAccount("ironcaptain44@gmail.com", "admin123");
+                }, child: const Text('yeoy')
+                ),
               ],
             ),
           ),

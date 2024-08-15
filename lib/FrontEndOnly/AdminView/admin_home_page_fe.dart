@@ -1,10 +1,16 @@
+import 'dart:io';
+
+import 'package:dio/dio.dart';
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:fluttersip/FrontEndOnly/Service/global_service_fe.dart';
 import 'package:fluttersip/FrontEndOnly/profile_page_fe.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:toggle_switch/toggle_switch.dart';
 import 'package:provider/provider.dart';
+import 'package:fluttersip/FrontEndOnly/Service/image_file_service.dart';
 
 
 class AdminHomePageFE extends StatefulWidget {
@@ -42,6 +48,53 @@ class _AdminHomePageFEState extends State<AdminHomePageFE> {
     }
   }
 
+  bool isDownloading = false;
+  String progress = '';
+
+  Future<void> downloadFile() async {
+    Dio dio = Dio();
+    try {
+      setState(() {
+        isDownloading = true;
+      });
+
+      // Define the URL and the file path
+      String url = "https://example.com/sample.pdf";
+      String fileName = url.split('/').last;
+
+      // Get the directory to save the file
+      var dir = await getApplicationDocumentsDirectory();
+
+      await dio.download(
+        url,
+        "${dir.path}/$fileName",
+        onReceiveProgress: (received, total) {
+          if (total != -1) {
+            setState(() {
+              progress = "${(received / total * 100).toStringAsFixed(0)}%";
+            });
+          }
+        },
+      );
+
+      setState(() {
+        isDownloading = false;
+        progress = "Download Completed";
+      });
+
+      // Display the file path after download
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("File saved to ${dir.path}/$fileName")),
+      );
+    } catch (e) {
+      setState(() {
+        isDownloading = false;
+        progress = "Download Failed";
+      });
+      print(e.toString());
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final globalState = Provider.of<GlobalStateFE>(context);
@@ -53,13 +106,13 @@ class _AdminHomePageFEState extends State<AdminHomePageFE> {
             onPressed: () {},
             icon: const Icon(Icons.notifications),
           ),
-          IconButton(
-            icon: const Icon(Icons.logout),
-            onPressed: () {
-              FirebaseAuth.instance.signOut();
-              Navigator.pop(context);
-            },
-          ),
+          // IconButton(
+          //   icon: const Icon(Icons.logout),
+          //   onPressed: () {
+          //     FirebaseAuth.instance.signOut();
+          //     Navigator.pop(context);
+          //   },
+          // ),
         ],
         leading: Builder(
           builder: (BuildContext context) {
@@ -84,162 +137,191 @@ class _AdminHomePageFEState extends State<AdminHomePageFE> {
           },
         ),
       ),
-      body: SingleChildScrollView(
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // User Details
-              const SizedBox(height: 16),
-              Text(
-                globalState.userService.userName ?? "Loading...",
-                style: const TextStyle(
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              Text(
-                globalState.userService.userRole ?? "Loading...",
-                style: const TextStyle(fontSize: 16),
-              ),
-              const SizedBox(height: 16),
-              const Text(
-                'Peka Saya',
-                style: TextStyle(
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              const SizedBox(height: 16),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.end,
+      body: StreamBuilder<QuerySnapshot>(
+        stream: null,
+        builder: (context, snapshot) {
+          return SingleChildScrollView(
+            child: Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Column(
-                    children: [
-                      ToggleSwitch(
-                        customWidths: const [100.0, 100.0],
-                        cornerRadius: 20.0,
-                        activeBgColors: const [
-                          [Colors.redAccent],
-                          [Colors.redAccent]
-                        ],
-                        activeFgColor: Colors.white,
-                        inactiveBgColor: Colors.grey,
-                        inactiveFgColor: Colors.white,
-                        totalSwitches: 2,
-                        labels: const ['Bulan Ini', 'Minggu Ini'],
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-              const SizedBox(height: 16),
-              Row(
-                children: [
-                  Expanded(
-                    child: _PekaCard(
-                      title: 'Total PEKA',
-                      icon: const Icon(Icons.layers),
-                      count: totalPekaCount,
-                    ),
-                  ),
-                  const SizedBox(width: 16),
-                  const Expanded(
-                    child: _PekaCard(
-                      title: 'Open',
-                      icon: Icon(Icons.folder_open),
-                      count: 0,
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 16),
-              const Row(
-                children: [
-                  Expanded(
-                    child: _PekaCard(
-                      title: 'Close',
-                      icon: Icon(Icons.checklist),
-                      count: 8,
-                    ),
-                  ),
-                  SizedBox(width: 16),
-                  Expanded(
-                    child: _PekaCard(
-                      title: 'Waiting Approval',
-                      icon: Icon(Icons.access_time),
-                      count: 0,
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 16),
-              const Row(
-                children: [
-                  Expanded(
-                    child: _PekaCard(
-                      title: 'Rejected',
-                      icon: Icon(Icons.cancel),
-                      count: 0,
-                    ),
-                  ),
-                  SizedBox(width: 16),
-                  Expanded(
-                    child: _PekaCard(
-                      title: 'Overdue',
-                      icon: Icon(Icons.calendar_today),
-                      count: 0,
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 24),
-
-              // Super Admin Section
-              const Row(
-                children: [
+                  // User Details
+                  const SizedBox(height: 16),
                   Text(
-                    'Super Admin',
-                    style: TextStyle(
+                    globalState.userService.userName ?? "Loading...",
+                    style: const TextStyle(
+                      fontSize: 20,
                       fontWeight: FontWeight.bold,
-                      fontSize: 18,
+                    ),
+                  ),
+                  Text(
+                    globalState.userService.userRole ?? "Loading...",
+                    style: const TextStyle(fontSize: 16),
+                  ),
+                  const SizedBox(height: 16),
+                  const Text(
+                    'Peka Saya',
+                    style: TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    children: [
+                      Column(
+                        children: [
+                          ToggleSwitch(
+                            customWidths: const [100.0, 100.0],
+                            cornerRadius: 0,
+                            activeBgColors: const [
+                              [Colors.redAccent],
+                              [Colors.redAccent]
+                            ],
+                            activeFgColor: Colors.white,
+                            inactiveBgColor: Colors.grey,
+                            inactiveFgColor: Colors.white,
+                            totalSwitches: 2,
+                            labels: const ['Bulan Ini', 'Minggu Ini'],
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 16),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: _PekaCard(
+                          title: 'Total PEKA',
+                          icon: const Icon(Icons.layers),
+                          count: totalPekaCount,
+                        ),
+                      ),
+                      const SizedBox(width: 16),
+                      const Expanded(
+                        child: _PekaCard(
+                          title: 'Open',
+                          icon: Icon(Icons.folder_open),
+                          count: 0,
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 16),
+                  const Row(
+                    children: [
+                      Expanded(
+                        child: _PekaCard(
+                          title: 'Close',
+                          icon: Icon(Icons.checklist),
+                          count: 8,
+                        ),
+                      ),
+                      SizedBox(width: 16),
+                      Expanded(
+                        child: _PekaCard(
+                          title: 'On Progress',
+                          icon: Icon(Icons.access_time),
+                          count: 0,
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 16),
+                  const Row(
+                    children: [
+                      Expanded(
+                        child: _PekaCard(
+                          title: 'Rejected',
+                          icon: Icon(Icons.cancel),
+                          count: 0,
+                        ),
+                      ),
+                      SizedBox(width: 16),
+                      Expanded(
+                        child: _PekaCard(
+                          title: 'Overdue',
+                          icon: Icon(Icons.calendar_today),
+                          count: 0,
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 24),
+
+                  // Super Admin Section
+                  const Row(
+                    children: [
+                      Text(
+                        'Super Admin',
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 18,
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 16),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    children: [
+                      Column(
+                        children: [
+                          ToggleSwitch(
+                            customWidths: const [100.0, 100.0],
+                            cornerRadius: 0,
+                            activeBgColors: const [
+                              [Colors.redAccent],
+                              [Colors.redAccent]
+                            ],
+                            activeFgColor: Colors.white,
+                            inactiveBgColor: Colors.grey,
+                            inactiveFgColor: Colors.white,
+                            totalSwitches: 2,
+                            labels: const ['Bulan Ini', 'Minggu Ini'],
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 16),
+                  Container(
+                    padding: const EdgeInsets.all(16.0),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Bukti Gambar / Observasi',
+                          style: TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        SizedBox(height: 8.0),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            isDownloading
+                                ? CircularProgressIndicator()
+                                : ElevatedButton(
+                              onPressed: downloadFile,
+                              child: Text("Download File"),
+                            ),
+                            SizedBox(height: 20),
+                            Text(progress),
+                          ],
+                        ),
+                      ],
                     ),
                   ),
                 ],
               ),
-              const SizedBox(height: 16),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.end,
-                children: [
-                  Column(
-                    children: [
-                      ToggleSwitch(
-                        customWidths: const [100.0, 100.0],
-                        cornerRadius: 20.0,
-                        activeBgColors: const [
-                          [Colors.redAccent],
-                          [Colors.redAccent]
-                        ],
-                        activeFgColor: Colors.white,
-                        inactiveBgColor: Colors.grey,
-                        inactiveFgColor: Colors.white,
-                        totalSwitches: 2,
-                        labels: const ['Bulan Ini', 'Minggu Ini'],
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-
-
-
-
-
-
-            ],
-          ),
-        ),
+            ),
+          );
+        }
       ),
 
       bottomNavigationBar: BottomNavigationBar(

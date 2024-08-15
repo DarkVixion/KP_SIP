@@ -14,10 +14,14 @@ class UserServiceFE {
   String? _userName;
   String? _userRole;
   String? _userId;
+  String? _userEmail;
+  String? _userKantor;
 
   String? get userName => _userName;
   String? get userRole => _userRole;
   String? get userId => _userId;
+  String? get userEmail => _userEmail;
+  String? get userKantor => _userKantor;
 
   Future<void> initialize() async {
     final user = _auth.currentUser;
@@ -34,6 +38,8 @@ class UserServiceFE {
         _userName = userDoc['name'];  // Assuming the field name is 'name'
         _userRole = userDoc['role'];  // Assuming the field name is 'role'
         _userId = userDoc['userId'];
+        _userEmail = userDoc['email'];
+        _userKantor = userDoc['perusahaan'];
       }
     } catch (e) {
       print("Error fetching user data: $e");

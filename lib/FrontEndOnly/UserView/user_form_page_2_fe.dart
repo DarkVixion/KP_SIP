@@ -46,7 +46,7 @@ class _UserFormPage2FEState extends State<UserFormPage2FE> {
                 padding: const EdgeInsets.all(16.0),
                 decoration: BoxDecoration(
                   border: Border.all(color: Colors.blueGrey),
-                  borderRadius: BorderRadius.circular(12.0),
+                  borderRadius: BorderRadius.circular(0),
                 ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.center,
@@ -68,16 +68,24 @@ class _UserFormPage2FEState extends State<UserFormPage2FE> {
                 padding: const EdgeInsets.all(16.0),
                 decoration: BoxDecoration(
                   border: Border.all(color: Colors.blueGrey),
-                  borderRadius: BorderRadius.circular(12.0),
+                  borderRadius: BorderRadius.circular(0),
                 ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text(
-                      'Pilih CLSR :  ',
-                      style: TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
+                    const Text.rich(
+                      TextSpan(
+                          text: 'Pilih CLSR',
+                          style: TextStyle(
+                              color: Colors.black,
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold
+                          ),children: <TextSpan>[
+                        TextSpan(
+                          text: ' *',
+                          style: TextStyle(color: Colors.red, fontSize: 18),
+                        ),
+                      ]
                       ),
                     ),
                     const Text(
