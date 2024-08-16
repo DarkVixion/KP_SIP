@@ -3,6 +3,8 @@ import 'package:dio/dio.dart';
 import 'package:path_provider/path_provider.dart';
 
 class Test extends StatefulWidget {
+  const Test({super.key});
+
   @override
   _TestState createState() => _TestState();
 }
@@ -59,19 +61,19 @@ class _TestState extends State<Test> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Download Button Example'),
+        title: const Text('Download Button Example'),
       ),
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             isDownloading
-                ? CircularProgressIndicator()
+                ? const CircularProgressIndicator()
                 : ElevatedButton(
               onPressed: downloadFile,
-              child: Text("Download File"),
+              child: const Text("Download File"),
             ),
-            SizedBox(height: 20),
+            const SizedBox(height: 20),
             Text(progress),
           ],
         ),
@@ -81,7 +83,7 @@ class _TestState extends State<Test> {
 }
 
 void main() {
-  runApp(MaterialApp(
+  runApp(const MaterialApp(
     home: Test(),
   ));
 }

@@ -121,7 +121,7 @@ class _MyProfilePageState extends State<ProfilePageFE> {
                                 Container(
                                   padding: const EdgeInsets.only(
                                       left: 16,right: 16, top: 5,bottom: 5),
-                                  decoration: BoxDecoration(
+                                  decoration: const BoxDecoration(
                                     color: Colors.red,
                                   ),
                                   child: Text(

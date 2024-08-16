@@ -1,7 +1,5 @@
-import 'dart:io';
 
 import 'package:dio/dio.dart';
-import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -10,7 +8,6 @@ import 'package:fluttersip/FrontEndOnly/profile_page_fe.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:toggle_switch/toggle_switch.dart';
 import 'package:provider/provider.dart';
-import 'package:fluttersip/FrontEndOnly/Service/image_file_service.dart';
 
 
 class AdminHomePageFE extends StatefulWidget {
@@ -59,7 +56,7 @@ class _AdminHomePageFEState extends State<AdminHomePageFE> {
       });
 
       // Define the URL and the file path
-      String url = "https://example.com/sample.pdf";
+      String url = "https://elibrary.unikom.ac.id/id/eprint/4886/8/UNIKOM_10113414_NANDA TEMAS MIKO_BAB II.pdf";
       String fileName = url.split('/').last;
 
       // Get the directory to save the file
@@ -196,7 +193,8 @@ class _AdminHomePageFEState extends State<AdminHomePageFE> {
                       Expanded(
                         child: _PekaCard(
                           title: 'Total PEKA',
-                          icon: const Icon(Icons.layers),
+                          icon: const Icon(Icons.layers,
+                            color: Color.fromARGB(255, 103, 80, 164),),
                           count: totalPekaCount,
                         ),
                       ),
@@ -204,7 +202,8 @@ class _AdminHomePageFEState extends State<AdminHomePageFE> {
                       const Expanded(
                         child: _PekaCard(
                           title: 'Open',
-                          icon: Icon(Icons.folder_open),
+                          icon: Icon(Icons.folder_open,
+                            color: Color.fromARGB(255, 210, 157, 172),),
                           count: 0,
                         ),
                       ),
@@ -216,7 +215,8 @@ class _AdminHomePageFEState extends State<AdminHomePageFE> {
                       Expanded(
                         child: _PekaCard(
                           title: 'Close',
-                          icon: Icon(Icons.checklist),
+                          icon: Icon(Icons.checklist,
+                              color: Color.fromARGB(221, 50, 205, 50)),
                           count: 8,
                         ),
                       ),
@@ -224,7 +224,8 @@ class _AdminHomePageFEState extends State<AdminHomePageFE> {
                       Expanded(
                         child: _PekaCard(
                           title: 'On Progress',
-                          icon: Icon(Icons.access_time),
+                          icon: Icon(Icons.access_time,
+                              color: Color.fromARGB(255, 192, 15, 12)),
                           count: 0,
                         ),
                       ),
@@ -236,7 +237,8 @@ class _AdminHomePageFEState extends State<AdminHomePageFE> {
                       Expanded(
                         child: _PekaCard(
                           title: 'Rejected',
-                          icon: Icon(Icons.cancel),
+                          icon: Icon(Icons.cancel,
+                              color: Color.fromARGB(255, 255, 137, 129)),
                           count: 0,
                         ),
                       ),
@@ -244,7 +246,8 @@ class _AdminHomePageFEState extends State<AdminHomePageFE> {
                       Expanded(
                         child: _PekaCard(
                           title: 'Overdue',
-                          icon: Icon(Icons.calendar_today),
+                          icon: Icon(Icons.calendar_today,
+                              color: Color.fromARGB(255, 117, 117, 117)),
                           count: 0,
                         ),
                       ),
@@ -293,30 +296,48 @@ class _AdminHomePageFEState extends State<AdminHomePageFE> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(
-                          'Bukti Gambar / Observasi',
-                          style: TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
-                          ),
+                        Row(
+                          children: [
+                            isDownloading
+                                ? const CircularProgressIndicator():
+                            Flexible(
+                              child: ElevatedButton(
+                                onPressed: downloadFile,
+                                style: ElevatedButton.styleFrom(
+                                  padding: EdgeInsets.zero,
+                                  shape: const RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.zero, // Square shape
+                                  ),
+                                ),
+                                child: Container(
+                                  width: double.infinity, // Full width
+                                  padding: const EdgeInsets.all(16), // Inner padding
+                                  child: const Row(
+                                    children: [
+                                      Icon(Icons.download),
+                                      SizedBox(width: 16),
+                                      Text('DownLoad Peka'),
+                                      Spacer(),
+                                      Icon(Icons.keyboard_arrow_down),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ],
                         ),
-                        SizedBox(height: 8.0),
+                        const SizedBox(height: 8.0),
                         Row(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            isDownloading
-                                ? CircularProgressIndicator()
-                                : ElevatedButton(
-                              onPressed: downloadFile,
-                              child: Text("Download File"),
-                            ),
-                            SizedBox(height: 20),
                             Text(progress),
                           ],
                         ),
+                        const SizedBox(height: 8.0),
                       ],
                     ),
                   ),
+
                 ],
               ),
             ),

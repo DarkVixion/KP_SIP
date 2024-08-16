@@ -75,7 +75,7 @@ class _UserHomePageFEState extends State<UserHomePageFE> {
             onPressed: () {
               Navigator.push(
                 context,
-                MaterialPageRoute(builder: (context) => Test()),
+                MaterialPageRoute(builder: (context) => const Test()),
               );
             },
           ),
@@ -161,7 +161,8 @@ class _UserHomePageFEState extends State<UserHomePageFE> {
                           Expanded(
                             child: _PekaCard(
                               title: 'Total PEKA',
-                              icon: const Icon(Icons.layers),
+                              icon: const Icon(Icons.layers,
+                                  color: Color.fromARGB(255, 236, 34, 31)),
                               count: totalPekaCount,
                             ),
                           ),
@@ -169,7 +170,8 @@ class _UserHomePageFEState extends State<UserHomePageFE> {
                           const Expanded(
                             child: _PekaCard(
                               title: 'On Progress',
-                              icon: Icon(Icons.access_time),
+                              icon: Icon(Icons.access_time,
+                                  color: Color.fromARGB(255, 20, 174, 92)),
                               count: 0,
                             ),
                           ),
@@ -181,7 +183,8 @@ class _UserHomePageFEState extends State<UserHomePageFE> {
                           Expanded(
                             child: _PekaCard(
                               title: 'Close',
-                              icon: Icon(Icons.checklist),
+                              icon: Icon(Icons.checklist,
+                                  color: Color.fromARGB(255, 255, 235, 19)),
                               count: 0,
                             ),
                           ),

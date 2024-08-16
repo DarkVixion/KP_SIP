@@ -1,3 +1,5 @@
+// ignore_for_file: unused_local_variable
+
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -183,11 +185,11 @@ class _LoginPageFEState extends State<LoginPageFE> {
                 ),
                 ElevatedButton(onPressed: () async {
                   dynamic sesuatu = await LoginService().loginAccount("test@gmail.com", "user123");
-                }, child: const Text('yey')
+                }, child: const Text('User Login')
                 ),
                 ElevatedButton(onPressed: () async {
                   dynamic sesuati = await LoginService().loginAccount("ironcaptain44@gmail.com", "admin123");
-                }, child: const Text('yeoy')
+                }, child: const Text('Admin Login')
                 ),
               ],
             ),
