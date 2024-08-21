@@ -1,8 +1,8 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
-import 'package:fluttersip/service/firebase_options.dart';
-import 'package:fluttersip/main_page.dart';
-import 'package:fluttersip/service/global_service.dart';
+import 'package:fluttersip/FrontEndOnly/Service/global_service_fe.dart';
+import 'package:fluttersip/FrontEndOnly/main_page_fe.dart';
+import 'package:fluttersip/views/service/firebase_options.dart';
 import 'package:provider/provider.dart';
 
 
@@ -10,7 +10,7 @@ import 'package:provider/provider.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
-  final globalState = GlobalState();
+  final globalState = GlobalStateFE();
   await globalState.initialize();  // Initialize UserService
   runApp(
     ChangeNotifierProvider(
@@ -26,7 +26,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return const MaterialApp(
       debugShowCheckedModeBanner: false,
-      home: MainPage(),
+      home: MainPageFE(),
     );
   }
 }

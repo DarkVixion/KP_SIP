@@ -1,8 +1,8 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:fluttersip/UserView/user_form_page.dart';
+import 'package:fluttersip/views/UserView/user_form_page.dart';
 import 'package:provider/provider.dart';
-import 'package:fluttersip/service/global_service.dart';
+import 'package:fluttersip/views/service/global_service.dart';
 
 class AdminPekaPage extends StatefulWidget {
   const AdminPekaPage({super.key});

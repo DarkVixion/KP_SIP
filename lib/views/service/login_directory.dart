@@ -1,8 +1,8 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:fluttersip/home_page.dart';
-import 'package:fluttersip/UserView/user_home_page.dart';
+import 'package:fluttersip/views/home_page.dart';
+import 'package:fluttersip/views/UserView/user_home_page.dart';
 import '../AdminView/admin_home_page.dart';
 
 

@@ -1,10 +1,11 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:fluttersip/login_page.dart';
-import 'package:fluttersip/service/login_directory.dart';
+import 'package:fluttersip/FrontEndOnly/Service/login_directory_fe.dart';
+import 'package:fluttersip/FrontEndOnly/login_page_fe.dart';
 
-class MainPage extends StatelessWidget {
-  const MainPage({super.key});
+
+class MainPageFE extends StatelessWidget {
+  const MainPageFE({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -13,12 +14,12 @@ class MainPage extends StatelessWidget {
         stream: FirebaseAuth.instance.authStateChanges(),
         builder: (context, snapshot){
           if(snapshot.hasData){
-            return const LoginDirectoy();
+            return const LoginDirectoryFE();
           }else {
-            return const LoginPage();
+            return const LoginPageFE();
           }
         },
-     ),
+      ),
     );
   }
 }

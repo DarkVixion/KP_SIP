@@ -1,19 +1,20 @@
+import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
-import 'package:flutter/material.dart';
-import 'package:fluttersip/UserView/user_home_page.dart';
-import 'package:fluttersip/UserView/user_form_page.dart';
-import 'package:fluttersip/profile_page.dart';
+import 'package:fluttersip/FrontEndOnly/UserView/user_form_page_0_fe.dart';
+import 'package:fluttersip/FrontEndOnly/UserView/user_home_page_fe.dart';
+import 'package:fluttersip/FrontEndOnly/profile_page_fe.dart';
 
-class UserPekaPage extends StatefulWidget {
-  const UserPekaPage({super.key});
+
+class UserPekaPageFE extends StatefulWidget {
+  const UserPekaPageFE({super.key});
 
   @override
-  State<UserPekaPage> createState() => _UserPekaPageState();
+  State<UserPekaPageFE> createState() => _UserPekaPageFEState();
 }
 
-class _UserPekaPageState extends State<UserPekaPage> {
+class _UserPekaPageFEState extends State<UserPekaPageFE> {
   int _selectedIndex = 0;
   final String? userId = FirebaseAuth.instance.currentUser?.uid;
   final String targetQuestionId = "Tipe Observasi"; // The question ID to filter by
@@ -42,12 +43,12 @@ class _UserPekaPageState extends State<UserPekaPage> {
     if (index == 0) {
       Navigator.push(
         context,
-        MaterialPageRoute(builder: (context) => const UserHomePage()),
+        MaterialPageRoute(builder: (context) => const UserHomePageFE()),
       );
     } else if (index == 2) {
       Navigator.push(
         context,
-        MaterialPageRoute(builder: (context) => const ProfilePage()),
+        MaterialPageRoute(builder: (context) => const ProfilePageFE()),
       );
     }
   }
@@ -57,7 +58,7 @@ class _UserPekaPageState extends State<UserPekaPage> {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.blue[400],
-        title: const Text('Daftar PEKA Saya', textAlign: TextAlign.center),
+        title: const Text('Daftar PEKA Saya FE', textAlign: TextAlign.center),
         automaticallyImplyLeading: false,
       ),
       body: StreamBuilder<QuerySnapshot>(
@@ -100,7 +101,7 @@ class _UserPekaPageState extends State<UserPekaPage> {
                 margin: const EdgeInsets.symmetric(vertical: 8.0),
                 decoration: BoxDecoration(
                   border: Border.all(color: Colors.blueGrey),
-                  borderRadius: BorderRadius.circular(12.0),
+                  borderRadius: BorderRadius.circular(0),
                   color: Colors.white,
                 ),
                 child: Column(
@@ -112,7 +113,7 @@ class _UserPekaPageState extends State<UserPekaPage> {
                         return Padding(
                           padding: const EdgeInsets.symmetric(vertical: 4.0),
                           child: FutureBuilder<String?>(
-                            future: _getImageUrl('adminprofile.jpg'), // Static image path
+                            future: _getImageUrl('CLSR.png'), // Static image path
                             builder: (context, imageSnapshot) {
                               if (imageSnapshot.connectionState == ConnectionState.waiting) {
                                 return const CircularProgressIndicator();
@@ -171,11 +172,17 @@ class _UserPekaPageState extends State<UserPekaPage> {
                     ),
                     const SizedBox(height: 8.0),
                     // Display timestamp
-                    Column(
+                    Row(
                       mainAxisAlignment: MainAxisAlignment.end,
                       children: [
+                        Icon(
+                          Icons.calendar_today, // Choose your preferred icon
+                          color: Colors.grey[700],
+                          size: 18, // Adjust the size as needed
+                        ),
+                        const SizedBox(width: 4),
                         Text(
-                          '${doc['timestamp']?.toDate().toString() ?? 'No timestamp'}',
+                          doc['timestamp']?.toDate().toString() ?? 'No timestamp',
                           style: TextStyle(
                             fontSize: 16,
                             color: Colors.grey[700],
@@ -197,7 +204,7 @@ class _UserPekaPageState extends State<UserPekaPage> {
             onPressed: () {
               Navigator.push(
                 context,
-                MaterialPageRoute(builder: (context) => const UserFormPage1()),
+                MaterialPageRoute(builder: (context) => const UserFormPage0FE()),
               );
             },
             label: const Text('Tambah PEKA'),

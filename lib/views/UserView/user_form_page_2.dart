@@ -1,7 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:fluttersip/UserView/form_update.dart';
-import 'package:fluttersip/UserView/user_form_page.dart'; // Import UserFormPage1
+// Import UserFormPage1
 
 class UserFormPage2 extends StatefulWidget {
   final Map<String, String?> combinedValues;
@@ -135,8 +134,8 @@ class _UserFormPage2State extends State<UserFormPage2> {
         onPressed: () {
           Navigator.pop(context); // Navigate back to UserFormPage1
         },
-        child: const Icon(Icons.navigate_before),
         backgroundColor: Colors.blue,
+        child: const Icon(Icons.navigate_before),
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
     );
