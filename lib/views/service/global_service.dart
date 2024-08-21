@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:fluttersip/AdminView/admin_home_page.dart';
-import 'package:fluttersip/AdminView/admin_peka_page.dart';
-import 'package:fluttersip/UserView/user_home_page.dart';
-import 'package:fluttersip/UserView/user_peka_page.dart';
-import 'package:fluttersip/profile_page.dart';
-import 'user_service.dart'; // Import your UserService class
+import 'package:fluttersip/views/AdminView/admin_home_page.dart';
+import 'package:fluttersip/views/AdminView/admin_peka_page.dart';
+import 'package:fluttersip/views/UserView/user_home_page.dart';
+import 'package:fluttersip/views/UserView/user_peka_page.dart';
+import 'package:fluttersip/views/profile_page.dart';
+import 'package:fluttersip/views/service/user_service.dart'; // Import your UserService class
 
 class GlobalState with ChangeNotifier {
   static final GlobalState _instance = GlobalState._internal();

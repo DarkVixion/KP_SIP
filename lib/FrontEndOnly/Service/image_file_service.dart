@@ -1,80 +1,198 @@
 import 'package:flutter/material.dart';
-import 'package:dio/dio.dart';
-import 'package:path_provider/path_provider.dart';
+import 'package:intl/intl.dart';
+
 
 class Test extends StatefulWidget {
   const Test({super.key});
 
   @override
-  _TestState createState() => _TestState();
+  State<Test> createState() => _TestState();
 }
 
 class _TestState extends State<Test> {
-  bool isDownloading = false;
-  String progress = '';
+  String? _selectedRadioValue;
+  DateTime? _selectedDate;
+  bool _radioValidationError = false;
+  bool _dateValidationError = false;
 
-  Future<void> downloadFile() async {
-    Dio dio = Dio();
-    try {
+  // Function to validate if all required fields are filled
+  bool _validateFields() {
+    setState(() {
+      _radioValidationError = _selectedRadioValue == null;
+      _dateValidationError = _selectedDate == null;
+    });
+    return !_radioValidationError && !_dateValidationError;
+  }
+
+  Future<void> _selectDate(BuildContext context) async {
+    final DateTime? pickedDate = await showDatePicker(
+      context: context,
+      initialDate: _selectedDate ?? DateTime.now(),
+      firstDate: DateTime(2000),
+      lastDate: DateTime(2100),
+    );
+    if (pickedDate != null && pickedDate != _selectedDate) {
       setState(() {
-        isDownloading = true;
+        _selectedDate = pickedDate;
+        _dateValidationError = false; // Reset error when date is picked
       });
+    }
+  }
 
-      // Define the URL and the file path
-      String url = "https://example.com/sample.pdf";
-      String fileName = url.split('/').last;
-
-      // Get the directory to save the file
-      var dir = await getApplicationDocumentsDirectory();
-
-      await dio.download(
-        url,
-        "${dir.path}/$fileName",
-        onReceiveProgress: (received, total) {
-          if (total != -1) {
-            setState(() {
-              progress = "${(received / total * 100).toStringAsFixed(0)}%";
-            });
-          }
-        },
+  void _moveToNextPage() {
+    if (_validateFields()) {
+      // Navigate to the next page if validation passes
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context) => const NextPage()),
       );
-
-      setState(() {
-        isDownloading = false;
-        progress = "Download Completed";
-      });
-
-      // Display the file path after download
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("File saved to ${dir.path}/$fileName")),
-      );
-    } catch (e) {
-      setState(() {
-        isDownloading = false;
-        progress = "Download Failed";
-      });
-      print(e.toString());
     }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Download Button Example'),
-      ),
-      body: Center(
+      appBar: AppBar(title: const Text('Required Fields Example')),
+      body: Padding(
+        padding: const EdgeInsets.all(16.0),
         child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            isDownloading
-                ? const CircularProgressIndicator()
-                : ElevatedButton(
-              onPressed: downloadFile,
-              child: const Text("Download File"),
+            // Question 1 - Radio List
+            Container(
+              padding: const EdgeInsets.all(16.0),
+              decoration: BoxDecoration(
+                border: Border.all(color: Colors.blueGrey),
+                borderRadius: BorderRadius.circular(12.0),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text(
+                    'Tipe Observasi',
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  const SizedBox(height: 16.0),
+                  RadioListTile<String>(
+                    title: const Text('Orang atau Pekerja'),
+                    value: 'Orang atau Pekerja',
+                    groupValue: _selectedRadioValue,
+                    onChanged: (value) {
+                      setState(() {
+                        _selectedRadioValue = value;
+                        _radioValidationError = false; // Reset error when a radio option is selected
+                      });
+                    },
+                  ),
+                  RadioListTile<String>(
+                    title: const Text('Peralatan dan Perlengkapan Kerja'),
+                    value: 'Peralatan dan Perlengkapan Kerja',
+                    groupValue: _selectedRadioValue,
+                    onChanged: (value) {
+                      setState(() {
+                        _selectedRadioValue = value;
+                        _radioValidationError = false;
+                      });
+                    },
+                  ),
+                  if (_radioValidationError)
+                    Container(
+                      margin: const EdgeInsets.only(top: 8.0),
+                      padding: const EdgeInsets.all(8.0),
+                      decoration: BoxDecoration(
+                        border: Border.all(color: Colors.red),
+                        borderRadius: BorderRadius.circular(8.0),
+                        color: Colors.red.shade50,
+                      ),
+                      child: const Text(
+                        'Silakan pilih tipe observasi.',
+                        style: TextStyle(color: Colors.red),
+                      ),
+                    ),
+                ],
+              ),
             ),
-            const SizedBox(height: 20),
-            Text(progress),
+            const SizedBox(height: 16.0),
+
+            // Question 2 - Date Picker
+            Container(
+              padding: const EdgeInsets.all(16.0),
+              decoration: BoxDecoration(
+                border: Border.all(color: Colors.blueGrey),
+                borderRadius: BorderRadius.circular(12.0),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text(
+                    'Tanggal Observasi',
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  const SizedBox(height: 16.0),
+                  InkWell(
+                    onTap: () => _selectDate(context),
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(
+                          vertical: 12.0, horizontal: 16.0),
+                      decoration: BoxDecoration(
+                        border: Border.all(color: Colors.blueGrey),
+                        borderRadius: BorderRadius.circular(12.0),
+                        color: Colors.white,
+                      ),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Row(
+                            children: [
+                              const Icon(Icons.calendar_today, color: Colors.blueGrey),
+                              const SizedBox(width: 8.0),
+                              Text(
+                                _selectedDate != null
+                                    ? DateFormat('dd/MM/yyyy').format(_selectedDate!)
+                                    : 'Pilih Tanggal',
+                                style: const TextStyle(
+                                  fontSize: 16.0,
+                                ),
+                              ),
+                            ],
+                          ),
+                          const Icon(Icons.arrow_drop_down, color: Colors.blueGrey),
+                        ],
+                      ),
+                    ),
+                  ),
+                  if (_dateValidationError)
+                    Container(
+                      margin: const EdgeInsets.only(top: 8.0),
+                      padding: const EdgeInsets.all(8.0),
+                      decoration: BoxDecoration(
+                        border: Border.all(color: Colors.red),
+                        borderRadius: BorderRadius.circular(8.0),
+                        color: Colors.red.shade50,
+                      ),
+                      child: const Text(
+                        'Silakan pilih tanggal observasi.',
+                        style: TextStyle(color: Colors.red),
+                      ),
+                    ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 16.0),
+
+            const Spacer(),
+
+            // Next Button
+            ElevatedButton(
+              onPressed: _moveToNextPage,
+              child: const Text('Lanjutkan'),
+            ),
           ],
         ),
       ),
@@ -82,8 +200,14 @@ class _TestState extends State<Test> {
   }
 }
 
-void main() {
-  runApp(const MaterialApp(
-    home: Test(),
-  ));
+class NextPage extends StatelessWidget {
+  const NextPage({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: const Text('Next Page')),
+      body: const Center(child: Text('This is the next page!')),
+    );
+  }
 }

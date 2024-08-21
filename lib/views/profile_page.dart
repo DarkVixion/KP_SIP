@@ -2,8 +2,8 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:fluttersip/service/global_service.dart';
-import 'main_page.dart';
+import 'package:fluttersip/views/service/global_service.dart';
+import 'package:fluttersip/views/main_page.dart';
 
 class ProfilePage extends StatefulWidget {
   const ProfilePage({super.key});

@@ -2,7 +2,7 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttersip/FrontEndOnly/Service/global_service_fe.dart';
 import 'package:fluttersip/FrontEndOnly/main_page_fe.dart';
-import 'package:fluttersip/service/firebase_options.dart';
+import 'package:fluttersip/views/service/firebase_options.dart';
 import 'package:provider/provider.dart';
 
 

@@ -1,10 +1,10 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:fluttersip/service/user_service.dart';
+import 'package:fluttersip/views/service/user_service.dart';
 import 'package:toggle_switch/toggle_switch.dart';
-import 'package:fluttersip/UserView/user_peka_page.dart';
+import 'package:fluttersip/views/UserView/user_peka_page.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:fluttersip/profile_page.dart';
+import 'package:fluttersip/views/profile_page.dart';
 
 class UserHomePage extends StatefulWidget {
   const UserHomePage({super.key});

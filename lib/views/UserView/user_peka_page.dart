@@ -2,9 +2,9 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
-import 'package:fluttersip/UserView/user_home_page.dart';
-import 'package:fluttersip/UserView/user_form_page.dart';
-import 'package:fluttersip/profile_page.dart';
+import 'package:fluttersip/views/UserView/user_home_page.dart';
+import 'package:fluttersip/views/UserView/user_form_page.dart';
+import 'package:fluttersip/views/profile_page.dart';
 
 class UserPekaPage extends StatefulWidget {
   const UserPekaPage({super.key});

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:fluttersip/UserView/user_form_page_2.dart';
-import 'package:fluttersip/UserView/user_peka_page.dart';
+import 'package:fluttersip/views/UserView/user_form_page_2.dart';
+import 'package:fluttersip/views/UserView/user_peka_page.dart';
 
 
 
@@ -42,10 +42,10 @@ class _UserFormUpdateState extends State<UserFormUpdate> {
   void _saveToFirestore(Map<String, String?> values) {
     final firestore = FirebaseFirestore.instance;
 
-    var observations = values.entries.map((entry) {
+    var observations = values.entries.map((entri) {
       return {
-        'questionId': entry.key,
-        'answer': entry.value,
+        'questionId': entri.key,
+        'answer': entri.value,
       };
     }).toList();
 

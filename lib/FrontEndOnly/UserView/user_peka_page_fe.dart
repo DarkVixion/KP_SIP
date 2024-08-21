@@ -113,7 +113,7 @@ class _UserPekaPageFEState extends State<UserPekaPageFE> {
                         return Padding(
                           padding: const EdgeInsets.symmetric(vertical: 4.0),
                           child: FutureBuilder<String?>(
-                            future: _getImageUrl('adminprofile.jpg'), // Static image path
+                            future: _getImageUrl('CLSR.png'), // Static image path
                             builder: (context, imageSnapshot) {
                               if (imageSnapshot.connectionState == ConnectionState.waiting) {
                                 return const CircularProgressIndicator();

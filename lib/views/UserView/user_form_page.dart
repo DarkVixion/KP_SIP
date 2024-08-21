@@ -1,7 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:fluttersip/UserView/form_update.dart';
+import 'package:fluttersip/views/UserView/form_update.dart';
 
 
 class UserFormPage1 extends StatefulWidget {

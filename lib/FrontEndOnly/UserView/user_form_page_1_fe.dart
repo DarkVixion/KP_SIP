@@ -13,6 +13,14 @@ class UserFormPage1FE extends StatefulWidget {
 class _UserFormPage1FEState extends State<UserFormPage1FE> {
   String? _selectedFirstCharacter;
   String? _selectedSecondCharacter;
+  String? _selectedValue4; // For first question (radio list)
+
+  // Arrays for radio list options
+  final List<String> options4 = [
+    'Safe Action (Tindakan Aman) ','Safe Condition (Kondisi Aman) ',
+    'Unsafe Action (Tindakan Tidak Aman) ','Unsafe Condition (Kondisi Tidak Aman) '
+    ,'Nearmiss (Hampir Celaka) '
+  ];
 
   final List<String> firstOptions = [
     'Orang atau Pekerja',
@@ -30,13 +38,29 @@ class _UserFormPage1FEState extends State<UserFormPage1FE> {
     'Lingkungan Kerja': ['Kerapihan ','Kebersihan / Hygiene ','Akses ',' Keamanan Personal ',' Pengelolaan Limbah / Sampah ',' Bahan Berbahaya / Beracun (B3) ','Pencahayaan ',' Bahaya Binatang (Hewan liar, serangga, dll) ',' Ergonomi ',' Kebisingan ',' Dan Lain-lain '],
   };
 
-  String? _selectedValue4; // For first question (radio list)
+  // Validation flags
+  bool _tipeObservasiError = false;
+  bool _kategoriError = false;
+  bool _subKategoriError = false;
 
-  // Arrays for radio list options
-  final List<String> options4 = [
-    'Safe Action (Tindakan Aman) ','Safe Condition (Kondisi Aman) ',
-    'Unsafe Action (Tindakan Tidak Aman) ','Unsafe Condition (Kondisi Tidak Aman) '
-    ,'Nearmiss (Hampir Celaka) '];
+  void _validateAndProceed() {
+    setState(() {
+      // Validate each field
+      _tipeObservasiError = _selectedValue4 == null;
+      _kategoriError = _selectedFirstCharacter == null;
+      _subKategoriError = _selectedFirstCharacter != null && _selectedSecondCharacter == null;
+    });
+
+    // If all fields are valid, proceed to the next page
+    if (!_tipeObservasiError && !_kategoriError && !_subKategoriError) {
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context) => const UserFormPage2FE()),
+      );
+    }
+  }
+
+
 
   @override
   Widget build(BuildContext context) {
@@ -88,9 +112,18 @@ class _UserFormPage1FEState extends State<UserFormPage1FE> {
                       onChanged: (value) {
                         setState(() {
                           _selectedValue4 = value;
+                          _tipeObservasiError = false;
                         });
                       },
                     )),
+                    if (_tipeObservasiError)
+                      Padding(
+                        padding: const EdgeInsets.only(top: 8.0),
+                        child: Text(
+                          'Tipe Observasi wajib diisi.',
+                          style: TextStyle(color: Colors.red.shade700),
+                        ),
+                      ),
                   ],
                 ),
               ),
@@ -129,12 +162,22 @@ class _UserFormPage1FEState extends State<UserFormPage1FE> {
                           onChanged: (String? value) {
                             setState(() {
                               _selectedFirstCharacter = value;
-                              _selectedSecondCharacter = null; // Reset the second selection
+                              _selectedSecondCharacter = null;// Reset the second selection
+                              _kategoriError = false;
+                              _subKategoriError = false;
                             });
                           },
                         ),
                       );
                     }),
+                    if (_kategoriError)
+                      Padding(
+                        padding: const EdgeInsets.only(top: 8.0),
+                        child: Text(
+                          'Kategori wajib diisi.',
+                          style: TextStyle(color: Colors.red.shade700),
+                        ),
+                      ),
                   ],
                 ),
               ),
@@ -174,11 +217,20 @@ class _UserFormPage1FEState extends State<UserFormPage1FE> {
                             onChanged: (String? value) {
                               setState(() {
                                 _selectedSecondCharacter = value;
+                                _subKategoriError = false;
                               });
                             },
                           ),
                         );
                       }),
+                      if (_subKategoriError)
+                        Padding(
+                          padding: const EdgeInsets.only(top: 8.0),
+                          child: Text(
+                            'Sub-Category wajib diisi.',
+                            style: TextStyle(color: Colors.red.shade700),
+                          ),
+                        ),
                     ],
                   ),
                 ),
@@ -204,12 +256,7 @@ class _UserFormPage1FEState extends State<UserFormPage1FE> {
                   Column(
                     children: [
                       ElevatedButton(
-                        onPressed: (){
-                          Navigator.push(
-                              context,
-                              MaterialPageRoute(builder: (context) => const UserFormPage2FE())
-                          );
-                        },
+                        onPressed: _validateAndProceed,
                         child: const Text(
                           'Next',
                           style: TextStyle(

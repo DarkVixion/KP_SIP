@@ -3,9 +3,9 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:fluttersip/service/login_service.dart';
+import 'package:fluttersip/views/service/login_service.dart';
 import 'package:provider/provider.dart';
-import 'package:fluttersip/service/firebase_options.dart';
+import 'package:fluttersip/views/service/firebase_options.dart';
 import 'package:fluttersip/main.dart';
 import 'package:fluttersip/FrontEndOnly/Service/global_service_fe.dart';
 import 'package:fluttersip/FrontEndOnly/forgot_pw_page_fe.dart';

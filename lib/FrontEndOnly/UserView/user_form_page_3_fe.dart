@@ -16,6 +16,28 @@ class _UserFormPage3FEState extends State<UserFormPage3FE> {
   final TextEditingController _textController6 = TextEditingController(); // For second question (text input)
   final TextEditingController _textController7 = TextEditingController();
   final TextEditingController _textController8 = TextEditingController();
+  bool _deskripsiObservasiError = false;
+  bool _directActionError = false;
+  bool _saranAplikasiError = false;
+  void _validateAndProceed() {
+    setState(() {
+      // Validate each field
+      _deskripsiObservasiError = _textController6.text.isEmpty;
+      _directActionError = _textController7.text.isEmpty;
+      _saranAplikasiError = _textController8.text.isEmpty;
+
+    });
+
+    // If all fields are valid, proceed to the next page
+    if (!_deskripsiObservasiError &&
+        !_directActionError &&
+        !_saranAplikasiError) {
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context) => const UserPekaPageFE()),
+      );
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -34,92 +56,22 @@ class _UserFormPage3FEState extends State<UserFormPage3FE> {
         child: SingleChildScrollView(
           child: Column(
             children: <Widget>[
-              Container(
-                padding: const EdgeInsets.all(16.0),
-                decoration: BoxDecoration(
-                  border: Border.all(color: Colors.blueGrey),
-                  borderRadius: BorderRadius.circular(0),
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const Text.rich(
-                      TextSpan(
-                          text: 'Deskripsi Observasi / Observation Description',
-                          style: TextStyle(
-                              color: Colors.black,
-                              fontSize: 18,
-                              fontWeight: FontWeight.bold
-                          ),children: <TextSpan>[
-                        TextSpan(
-                          text: ' *',
-                          style: TextStyle(color: Colors.red, fontSize: 18),
-                        ),
-                      ]
-                      ),
-                    ),
-                    const SizedBox(height: 16.0), // Space between title and input
-                    TextField(
-                      controller: _textController6,
-                      decoration: const InputDecoration(
-                        labelText: 'Enter text',
-                      ),
-                    ),
-                    const SizedBox(height: 8.0), // Space between TextField and subtext
-                    const Text(
-                      'Contoh: Terdapat genangan air yang berorama tidak sedap ', // Subtext
-                      style: TextStyle(
-                        fontSize: 14,
-                        color: Colors.grey,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(height: 20),
-              Container(
-                padding: const EdgeInsets.all(16.0),
-                decoration: BoxDecoration(
-                  border: Border.all(color: Colors.blueGrey),
-                  borderRadius: BorderRadius.circular(0),
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const Text.rich(
-                      TextSpan(
-                          text: 'Direct Action (Tindakan Langsung)',
-                          style: TextStyle(
-                              color: Colors.black,
-                              fontSize: 18,
-                              fontWeight: FontWeight.bold
-                          ),children: <TextSpan>[
-                        TextSpan(
-                          text: ' *',
-                          style: TextStyle(color: Colors.red, fontSize: 18),
-                        ),
-                      ]
-                      ),
-                    ),
-                    const SizedBox(height: 16.0), // Space between title and input
-                    TextField(
-                      controller: _textController7,
-                      decoration: const InputDecoration(
-                        labelText: 'Enter text',
-                      ),
-                    ),
-                    const SizedBox(height: 8.0), // Space between TextField and subtext
-                    const Text(
-                      'Contoh: Menginformasikan kepada pihak terkait dan memberikan saran untuk segera dibersihkan/diperbaiki ', // Subtext
-                      style: TextStyle(
-                        fontSize: 14,
-                        color: Colors.grey,
-                      ),
-                    ),
-                  ],
-                ),
+              _buildTextFieldContainer(
+                label: 'Deskripsi Observasi / Observation Description',
+                isError: _deskripsiObservasiError,
+                controller: _textController6,
+                errorMessage: 'Deskripsi Observasi wajib diisi.',
+                hint: 'Contoh: Terdapat genangan air yang berorama tidak sedap',
               ),
               const SizedBox(height: 20.0),
+              _buildTextFieldContainer(
+                label: 'Direct Action (Tindakan Langsung)',
+                isError: _directActionError,
+                controller: _textController7,
+                errorMessage: 'Direct Action wajib diisi.',
+                hint: 'Contoh: Menginformasikan kepada pihak terkait dan memberikan saran untuk segera dibersihkan/diperbaiki ',
+              ),
+              const SizedBox(height: 20),
               Container(
                 padding: const EdgeInsets.all(16.0),
                 decoration: BoxDecoration(
@@ -153,43 +105,14 @@ class _UserFormPage3FEState extends State<UserFormPage3FE> {
                   ],
                 ),
               ),
-              const SizedBox(height: 20.0),
-              Container(
-                padding: const EdgeInsets.all(16.0),
-                decoration: BoxDecoration(
-                  border: Border.all(color: Colors.blueGrey),
-                  borderRadius: BorderRadius.circular(0),
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const Text.rich(
-                      TextSpan(
-                          text: 'Berikan saran anda untuk penggunaan Aplikasi ini',
-                          style: TextStyle(
-                              color: Colors.black,
-                              fontSize: 18,
-                              fontWeight: FontWeight.bold
-                          ),children: <TextSpan>[
-                        TextSpan(
-                          text: ' *',
-                          style: TextStyle(color: Colors.red, fontSize: 18),
-                        ),
-                      ]
-                      ),
-                    ),
-                    const SizedBox(height: 16.0), // Space between title and input
-                    TextField(
-                      controller: _textController8,
-                      decoration: const InputDecoration(
-                        labelText: 'Enter text',
-                      ),
-                    ),
-                    const SizedBox(height: 8.0), // Space between TextField and subtext
-                  ],
-                ),
-              ),
               const SizedBox(height: 20),
+              _buildTextFieldContainer(
+                label: 'Berikan saran anda untuk penggunaan Aplikasi ini',
+                isError: _saranAplikasiError,
+                controller: _textController8,
+                errorMessage: 'Saran Aplikasi wajib diisi.',
+              ),
+              const SizedBox(height: 20.0),
               Row(
                 mainAxisAlignment: MainAxisAlignment.end,
                 children: [
@@ -211,12 +134,7 @@ class _UserFormPage3FEState extends State<UserFormPage3FE> {
                   Column(
                     children: [
                       ElevatedButton(
-                        onPressed: (){
-                          Navigator.push(
-                              context,
-                              MaterialPageRoute(builder: (context) => const UserPekaPageFE())
-                          );
-                        },
+                        onPressed: _validateAndProceed,
                         child: const Text(
                           'Submit ',
                           style: TextStyle(
@@ -235,6 +153,51 @@ class _UserFormPage3FEState extends State<UserFormPage3FE> {
       ),
     );
   }
+}
+
+Widget _buildTextFieldContainer({
+  required String label,
+  required bool isError,
+  required TextEditingController controller,
+  required String errorMessage,
+  String? hint,
+}) {
+  return Container(
+    padding: const EdgeInsets.all(16.0),
+    decoration: BoxDecoration(
+      border: Border.all(color: Colors.blueGrey),
+      borderRadius: BorderRadius.circular(0),
+    ),
+    child: Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text.rich(
+          TextSpan(
+            text: label,
+            style: const TextStyle(
+              color: Colors.black,
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
+            ),
+            children: const [
+              TextSpan(
+                text: ' *',
+                style: TextStyle(color: Colors.red, fontSize: 18),
+              ),
+            ],
+          ),
+        ),
+        const SizedBox(height: 16.0),
+        TextField(
+          controller: controller,
+          decoration: InputDecoration(
+            labelText: hint ?? 'Enter text',
+            errorText: isError ? errorMessage : null,
+          ),
+        ),
+      ],
+    ),
+  );
 }
 
 class UploadOrCaptureImage extends StatefulWidget {

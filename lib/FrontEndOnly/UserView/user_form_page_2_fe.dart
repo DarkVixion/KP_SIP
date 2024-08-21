@@ -23,7 +23,28 @@ class _UserFormPage2FEState extends State<UserFormPage2FE> {
     'CLSR Elemen 6 - Lifting Operation (Operasi Pengangkatan)','CLSR Elemen 7 - Fit to Work (Fit untuk Bekerja)',
     'CLSR Elemen 8 - Working at Height (Bekerja di Ketinggian)','CLSR Elemen 9 - Personal Floatation Device (Perangkat Apung Pribadi)',
     'CLSR Elemen 10 - System Override (Peralatan keselamatan kritikal harus berfungsi dengan baik untuk menjaga keselamatan anda.)','CLSR Elemen 11 - Asset Integrity (Integritas Aset)',
-    'CLSR Elemen 12 - Driving Safety (Keselamatan Berkendara)'];
+    'CLSR Elemen 12 - Driving Safety (Keselamatan Berkendara)'
+  ];
+
+  // Validation flags
+  bool _tipeCLSRError = false;
+
+
+  void _validateAndProceed() {
+    setState(() {
+      // Validate each field
+      _tipeCLSRError = _selectedValue5 == null;
+
+    });
+
+    // If all fields are valid, proceed to the next page
+    if (!_tipeCLSRError) {
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context) => const UserFormPage3FE()),
+      );
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -104,9 +125,18 @@ class _UserFormPage2FEState extends State<UserFormPage2FE> {
                       onChanged: (value) {
                         setState(() {
                           _selectedValue5 = value;
+                          _tipeCLSRError = false;
                         });
                       },
                     )),
+                    if (_tipeCLSRError)
+                      Padding(
+                        padding: const EdgeInsets.only(top: 8.0),
+                        child: Text(
+                          'Pilih CLSR wajib diisi.',
+                          style: TextStyle(color: Colors.red.shade700),
+                        ),
+                      ),
                   ],
                 ),
               ),
@@ -132,12 +162,7 @@ class _UserFormPage2FEState extends State<UserFormPage2FE> {
             Column(
               children: [
                 ElevatedButton(
-                  onPressed: (){
-                    Navigator.push(
-                        context,
-                        MaterialPageRoute(builder: (context) => const UserFormPage3FE())
-                    );
-                  },
+                  onPressed: _validateAndProceed,
                   child: const Text(
                     'Next',
                     style: TextStyle(
