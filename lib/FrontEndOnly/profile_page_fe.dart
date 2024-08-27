@@ -28,7 +28,8 @@ class _MyProfilePageState extends State<ProfilePageFE> {
     var userName = box.read('userName');
     var userEmail = box.read('userEmail');
     var userRole = box.read('userRole');
-    var userFungsi = box.read('userFungsi');
+    var userFungsiD = box.read('userFungsiD');
+    var userFungsiJ = box.read('userFungsiJ');
 
 
     return Scaffold(
@@ -78,7 +79,7 @@ class _MyProfilePageState extends State<ProfilePageFE> {
                             Row(mainAxisAlignment: MainAxisAlignment.start,
                               children: [
                                 Text(
-                                  '$userFungsi' ,
+                                  '$userFungsiD' ,
                                   style: const TextStyle(
                                     fontSize: 18,
                                     fontWeight: FontWeight.bold,
@@ -96,7 +97,7 @@ class _MyProfilePageState extends State<ProfilePageFE> {
                                     color: Colors.red,
                                   ),
                                   child:  Text(
-                                    '$userRole',
+                                    '$userFungsiJ',
                                     style: const TextStyle(
                                       fontSize: 20,
                                       fontWeight: FontWeight.bold,

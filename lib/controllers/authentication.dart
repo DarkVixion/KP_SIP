@@ -13,7 +13,8 @@ class AuthenticationController extends GetxController{
   final userName = ''.obs;
   final userEmail = ''.obs;
   final userRole = ''.obs;  // For storing the role name
-  final userFungsi = ''.obs;  // For storing the fungsi name
+  final userFungsiD = ''.obs;  // For storing the fungsi name
+  final userFungsiJ = ''.obs;
   final box = GetStorage();
   Future login({
     required String email,
@@ -103,8 +104,10 @@ class AuthenticationController extends GetxController{
 
       if (response.statusCode == 200) {
         var responseBody = json.decode(response.body);
-        userFungsi.value = responseBody['departemen'];
-        box.write('userFungsi', userFungsi.value);
+        userFungsiD.value = responseBody['departemen'];
+        userFungsiJ.value = responseBody['jabatan'];
+        box.write('userFungsiD', userFungsiD.value);
+        box.write('userFungsiJ', userFungsiJ.value);
       } else {
         print('Fungsi fetch error: ${response.body}');
       }
@@ -137,7 +140,7 @@ class AuthenticationController extends GetxController{
         userName.value = '';
         userEmail.value = '';
         userRole.value = '';
-        userFungsi.value = '';
+        userFungsiD.value = '';
         // Redirect the user to the login screen (or another appropriate page)
         Get.offAll(() => const LoginPageFE());
       } else {
