@@ -5,6 +5,7 @@ import 'package:fluttersip/FrontEndOnly/Service/user_service_fe.dart';
 import 'package:fluttersip/FrontEndOnly/UserView/user_home_page_fe.dart';
 import 'package:fluttersip/FrontEndOnly/UserView/user_peka_page_fe.dart';
 import 'package:fluttersip/FrontEndOnly/profile_page_fe.dart';
+import 'package:get_storage/get_storage.dart';
 
 
 
@@ -27,9 +28,12 @@ class GlobalStateFE with ChangeNotifier {
   void onItemTapped(int index, BuildContext context) {
     _selectedIndex = index;
     notifyListeners();
+    final box = GetStorage();
+
+    var userRole = box.read('userRole');
 
     if (index == 0) {
-      if (userService.userRole == 'admin') {
+      if (userRole == 'Admin') {
         Navigator.push(
           context,
           MaterialPageRoute(builder: (context) => const AdminHomePageFE()),
@@ -41,7 +45,7 @@ class GlobalStateFE with ChangeNotifier {
         );
       }
     } else if (index == 1) {
-      if (userService.userRole == 'admin') {
+      if (userRole == 'Admin') {
         Navigator.push(
           context,
           MaterialPageRoute(builder: (context) => const AdminPekaPageFE()),

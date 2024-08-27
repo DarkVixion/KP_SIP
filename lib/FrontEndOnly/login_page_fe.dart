@@ -1,30 +1,8 @@
-// ignore_for_file: unused_local_variable
 
 import 'package:flutter/material.dart';
-import 'package:firebase_core/firebase_core.dart';
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:fluttersip/views/service/login_service.dart';
-import 'package:provider/provider.dart';
-import 'package:fluttersip/views/service/firebase_options.dart';
-import 'package:fluttersip/main.dart';
-import 'package:fluttersip/FrontEndOnly/Service/global_service_fe.dart';
 import 'package:fluttersip/FrontEndOnly/forgot_pw_page_fe.dart';
-
-
-
-
-void login() async {
-  WidgetsFlutterBinding.ensureInitialized();
-  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
-  final globalState = GlobalStateFE();
-  await globalState.initialize();  // Initialize UserService
-  runApp(
-    ChangeNotifierProvider(
-      create: (context) => globalState,
-      child: const MyApp(),
-    ),);
-}
-
+import 'package:fluttersip/controllers/authentication.dart';
+import 'package:get/get.dart';
 
 class LoginPageFE extends StatefulWidget {
   const LoginPageFE({super.key});
@@ -34,23 +12,10 @@ class LoginPageFE extends StatefulWidget {
 }
 
 class _LoginPageFEState extends State<LoginPageFE> {
-  final _emailController = TextEditingController();
-  final _passwordController = TextEditingController();
+  final TextEditingController _emailController = TextEditingController();
+  final TextEditingController _passwordController = TextEditingController();
+  final AuthenticationController _authenticationController = Get.put(AuthenticationController());
 
-  
-  Future signIn() async {
-    await FirebaseAuth.instance.signInWithEmailAndPassword(
-      email: _emailController.text.trim(),
-      password: _passwordController.text.trim(),
-    );
-  }
-
-  @override
-  void dispose() {
-    _emailController.dispose();
-    _passwordController.dispose();
-    super.dispose();
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -163,34 +128,46 @@ class _LoginPageFEState extends State<LoginPageFE> {
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 130.0),
                   child: GestureDetector(
-                    onTap: signIn,
+                    onTap: () async{
+                      await _authenticationController.login(
+                          email: _emailController.text.trim(),
+                          password: _passwordController.text.trim()
+                      );
+                    },
                     child: Container(
                       padding: const EdgeInsets.all(12),
                       decoration: BoxDecoration(
                         color: Colors.blue,
                         borderRadius: BorderRadius.circular(12),
                       ),
-                      child: const Center(
-                        child: Text(
-                          'Masuk',
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontWeight: FontWeight.bold,
-                            fontSize: 18,
-                          ),
+                      child:  Center(
+                        child: Obx((){
+                            return _authenticationController.isLoading.value ?
+                                  const CircularProgressIndicator(
+                                  color: Colors.white,
+                                ) :
+                            const Text(
+                              'Masuk',
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontWeight: FontWeight.bold,
+                                fontSize: 18,
+                              ),
+                            );
+                          }
                         ),
                       ),
                     ),
                   ),
                 ),
-                ElevatedButton(onPressed: () async {
-                  dynamic sesuatu = await LoginService().loginAccount("test@gmail.com", "user123");
-                }, child: const Text('User Login')
-                ),
-                ElevatedButton(onPressed: () async {
-                  dynamic sesuati = await LoginService().loginAccount("ironcaptain44@gmail.com", "admin123");
-                }, child: const Text('Admin Login')
-                ),
+                // ElevatedButton(onPressed: () async {
+                //   dynamic sesuatu = await LoginService().loginAccount("test@gmail.com", "user123");
+                // }, child: const Text('User Login')
+                // ),
+                // ElevatedButton(onPressed: () async {
+                //   dynamic sesuati = await LoginService().loginAccount("ironcaptain44@gmail.com", "admin123");
+                // }, child: const Text('Admin Login')
+                // ),
               ],
             ),
           ),

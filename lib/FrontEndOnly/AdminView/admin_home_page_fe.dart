@@ -2,7 +2,6 @@
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:fluttersip/FrontEndOnly/Service/global_service_fe.dart';
 import 'package:fluttersip/FrontEndOnly/profile_page_fe.dart';
 import 'package:path_provider/path_provider.dart';
@@ -19,7 +18,6 @@ class AdminHomePageFE extends StatefulWidget {
 
 class _AdminHomePageFEState extends State<AdminHomePageFE> {
 
-  final User user = FirebaseAuth.instance.currentUser!;
   int totalPekaCount = 0;
 
   @override

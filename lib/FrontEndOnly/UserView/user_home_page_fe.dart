@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:fluttersip/FrontEndOnly/Service/image_file_service.dart';
-import 'package:fluttersip/FrontEndOnly/Service/user_service_fe.dart';
+
 import 'package:fluttersip/FrontEndOnly/UserView/user_peka_page_fe.dart';
 import 'package:fluttersip/FrontEndOnly/profile_page_fe.dart';
+import 'package:get_storage/get_storage.dart';
 import 'package:toggle_switch/toggle_switch.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 
 
 class UserHomePageFE extends StatefulWidget {
@@ -16,37 +16,9 @@ class UserHomePageFE extends StatefulWidget {
 }
 
 class _UserHomePageFEState extends State<UserHomePageFE> {
-  final User user = FirebaseAuth.instance.currentUser!;
-  final userService = UserServiceFE();
+  final box = GetStorage();
+
   int _selectedIndex = 0;
-  final String? userId = FirebaseAuth.instance.currentUser?.uid;
-  int totalPekaCount = 0;
-
-  @override
-  void initState() {
-    super.initState();
-    _fetchPekaCount();
-  }
-
-  Future<void> _fetchPekaCount() async {
-    try {
-      // Fetch all documents in the 'observations' collection
-      QuerySnapshot querySnapshot = await FirebaseFirestore.instance
-          .collection('observations')
-          .where('userId', isEqualTo: userId)
-          .get();
-
-      // Count the number of documents
-      int count = querySnapshot.docs.length;
-
-      setState(() {
-        totalPekaCount = count;
-      });
-    } catch (e) {
-      print('Error fetching data: $e');
-    }
-  }
-
   void _onItemTapped(int index) {
     setState(() {
       _selectedIndex = index;
@@ -67,6 +39,8 @@ class _UserHomePageFEState extends State<UserHomePageFE> {
 
   @override
   Widget build(BuildContext context) {
+    var userName = box.read('userName');
+    var userRole = box.read('userRole');
     return Scaffold(
       appBar: AppBar(
         actions: [
@@ -114,14 +88,14 @@ class _UserHomePageFEState extends State<UserHomePageFE> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        userService.userName ?? "Loading...",
+                        '$userName',
                         style: const TextStyle(
                           fontSize: 20,
                           fontWeight: FontWeight.bold,
                         ),
                       ),
                       Text(
-                        userService.userRole ?? "Loading...",
+                        '$userRole',
                         style: const TextStyle(fontSize: 16),
                       ),
                       const SizedBox(height: 16),
@@ -156,18 +130,18 @@ class _UserHomePageFEState extends State<UserHomePageFE> {
                         ],
                       ),
                       const SizedBox(height: 16),
-                      Row(
+                      const Row(
                         children: [
                           Expanded(
                             child: _PekaCard(
                               title: 'Total PEKA',
-                              icon: const Icon(Icons.layers,
+                              icon: Icon(Icons.layers,
                                   color: Color.fromARGB(255, 236, 34, 31)),
-                              count: totalPekaCount,
+                              count: 11,
                             ),
                           ),
-                          const SizedBox(width: 16),
-                          const Expanded(
+                          SizedBox(width: 16),
+                          Expanded(
                             child: _PekaCard(
                               title: 'On Progress',
                               icon: Icon(Icons.access_time,

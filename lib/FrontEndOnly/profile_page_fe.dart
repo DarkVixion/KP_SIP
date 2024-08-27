@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:firebase_storage/firebase_storage.dart';
+import 'package:fluttersip/controllers/authentication.dart';
+import 'package:get/get.dart';
+import 'package:get_storage/get_storage.dart';
+
 import 'package:provider/provider.dart';
 import 'package:fluttersip/FrontEndOnly/Service/global_service_fe.dart';
-import 'package:fluttersip/FrontEndOnly/main_page_fe.dart';
 
 
 
@@ -16,40 +17,19 @@ class ProfilePageFE extends StatefulWidget {
 }
 
 class _MyProfilePageState extends State<ProfilePageFE> {
-  final user = FirebaseAuth.instance.currentUser!;
-  String? _profileImageUrl; // Variable to store profile image URL
 
-  @override
-  void initState() {
-    super.initState();
-    _loadProfileImage();
-  }
-
-  Future<void> _loadProfileImage() async {
-    try {
-      final globalState = Provider.of<GlobalStateFE>(context, listen: false);
-      String path;
-
-      // Set image path based on user role
-      if (globalState.userService.userRole == 'admin') {
-        path = 'adminprofile.jpg'; // Admin image path
-      } else {
-        path = 'userprofile.jpg'; // User image path
-      }
-
-      final ref = FirebaseStorage.instance.ref().child(path);
-      final url = await ref.getDownloadURL();
-      setState(() {
-        _profileImageUrl = url;
-      });
-    } catch (e) {
-      print('Error loading profile image: $e');
-    }
-  }
 
   @override
   Widget build(BuildContext context) {
     final globalState = Provider.of<GlobalStateFE>(context);
+    final AuthenticationController _authenticationController = Get.put(AuthenticationController());
+    Get.find<AuthenticationController>();
+    final box = GetStorage();
+    var userName = box.read('userName');
+    var userEmail = box.read('userEmail');
+    var userRole = box.read('userRole');
+    var userFungsi = box.read('userFungsi');
+
 
     return Scaffold(
       body: StreamBuilder<Object>(
@@ -59,28 +39,19 @@ class _MyProfilePageState extends State<ProfilePageFE> {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: <Widget>[
-                CircleAvatar(
+                const CircleAvatar(
                   radius: 50,
                   backgroundColor: Colors.blue,
-                  backgroundImage: _profileImageUrl != null
-                      ? NetworkImage(_profileImageUrl!)
-                      : null,
-                  child: _profileImageUrl == null
-                      ? const Icon(
-                    Icons.person,
-                    color: Colors.white,
-                    size: 50,
-                  )
-                      : null,
                 ),
                 const SizedBox(height: 16),
-                Text(
-                  globalState.userService.userName ?? "Loading...",
+                 Text(
+                  '$userName',
                   style: const TextStyle(
                     fontSize: 20,
                     fontWeight: FontWeight.bold,
                   ),
                 ),
+
                 const SizedBox(height: 16),
                 ElevatedButton(
                   onPressed: () {
@@ -107,7 +78,7 @@ class _MyProfilePageState extends State<ProfilePageFE> {
                             Row(mainAxisAlignment: MainAxisAlignment.start,
                               children: [
                                 Text(
-                                  globalState.userService.userKantor ?? "Loading..." ,
+                                  '$userFungsi' ,
                                   style: const TextStyle(
                                     fontSize: 18,
                                     fontWeight: FontWeight.bold,
@@ -124,8 +95,8 @@ class _MyProfilePageState extends State<ProfilePageFE> {
                                   decoration: const BoxDecoration(
                                     color: Colors.red,
                                   ),
-                                  child: Text(
-                                    globalState.userService.userRole ?? "Loading...",
+                                  child:  Text(
+                                    '$userRole',
                                     style: const TextStyle(
                                       fontSize: 20,
                                       fontWeight: FontWeight.bold,
@@ -134,11 +105,11 @@ class _MyProfilePageState extends State<ProfilePageFE> {
                                 ),
                               ],
                             ),
-                            Row(
+                             Row(
                               mainAxisAlignment: MainAxisAlignment.start,
                               children: [
                                 Text(
-                                  globalState.userService.userEmail ?? "Loading..." ,
+                                  '$userEmail' ,
                                   style: const TextStyle(
                                     fontSize: 18,
                                     fontWeight: FontWeight.bold,
@@ -156,20 +127,18 @@ class _MyProfilePageState extends State<ProfilePageFE> {
                   ),
                 ),
                 // Account
-                Padding(
-                  padding: const EdgeInsets.all(8.0),
+                const Padding(
+                  padding: EdgeInsets.all(8.0),
 
-                  child: Container(
-                    child: const Column(
-                      mainAxisAlignment: MainAxisAlignment.start,
-                      children: [
-                        Text('Account',
-                        style: TextStyle(
-                          fontSize: 24,
-                          fontWeight: FontWeight.bold,
-                        ),),
-                      ],
-                    ),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    children: [
+                      Text('Account',
+                      style: TextStyle(
+                        fontSize: 24,
+                        fontWeight: FontWeight.bold,
+                      ),),
+                    ],
                   ),
                 ),
                 Padding(
@@ -228,11 +197,7 @@ class _MyProfilePageState extends State<ProfilePageFE> {
 
                         ElevatedButton(
                           onPressed: () async {
-                            await FirebaseAuth.instance.signOut();
-                            Navigator.pushReplacement(
-                              context,
-                              MaterialPageRoute(builder: (context) => const MainPageFE()),
-                            );
+                            await _authenticationController.logout();
                           },
                           style: ElevatedButton.styleFrom(
                             padding: EdgeInsets.zero,
