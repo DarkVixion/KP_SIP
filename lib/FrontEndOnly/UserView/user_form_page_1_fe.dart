@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:fluttersip/constants/constants.dart';
+import 'package:provider/provider.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
+import 'package:fluttersip/FrontEndOnly/Service/global_service_fe.dart';
 import 'package:fluttersip/FrontEndOnly/UserView/user_form_page_2_fe.dart';
-
-
 
 class UserFormPage1FE extends StatefulWidget {
   const UserFormPage1FE({super.key});
@@ -11,66 +14,106 @@ class UserFormPage1FE extends StatefulWidget {
 }
 
 class _UserFormPage1FEState extends State<UserFormPage1FE> {
-  String? _selectedFirstCharacter;
-  String? _selectedSecondCharacter;
-  String? _selectedValue4; // For first question (radio list)
 
-  // Arrays for radio list options
-  final List<String> options4 = [
-    'Safe Action (Tindakan Aman) ','Safe Condition (Kondisi Aman) ',
-    'Unsafe Action (Tindakan Tidak Aman) ','Unsafe Condition (Kondisi Tidak Aman) '
-    ,'Nearmiss (Hampir Celaka) '
-  ];
 
-  final List<String> firstOptions = [
-    'Orang atau Pekerja',
-    'Peralatan dan Perlengkapan Kerja',
-    'Material / Bahan',
-    'Pengendalian Administrasi',
-    'Lingkungan Kerja'
-  ];
 
-  final Map<String, List<String>> secondOptions = {
-    'Orang atau Pekerja': [ ' Metode Kerja ','Tahapan Kerja ',' Posisi Kerja ','Postur Kerja ','Alat Pelindung Diri (APD) ','Dan Lain-lain '],
-    'Peralatan dan Perlengkapan Kerja': ['Ketersediaan Alat ',' Kesesuaian Fungsi Alat ','Kondisi Alat ','Penyimpanan / Penempatan Alat ',' Kondisi Pengaman / Tanda Bahaya ','Dan Lain-lain '],
-    'Material / Bahan': ['Ketiadaan Material ','Informasi Material ','Penanganan Material ','Penyimpanan Material ',' Kesesuaian Material ','Material Pengganti (Substitusi) ','Dan Lain-lain '],
-    'Pengendalian Administrasi': [' Izin Kerja ','Kajian Risiko ','Prosedur Operasional (POS) ','Sertifikasi / Inspeksi ','Isolasi Energi ','Rambu-rambu ','Serah Terima Pekerjaan ','Dan Lain-lain '],
-    'Lingkungan Kerja': ['Kerapihan ','Kebersihan / Hygiene ','Akses ',' Keamanan Personal ',' Pengelolaan Limbah / Sampah ',' Bahan Berbahaya / Beracun (B3) ','Pencahayaan ',' Bahaya Binatang (Hewan liar, serangga, dll) ',' Ergonomi ',' Kebisingan ',' Dan Lain-lain '],
-  };
 
-  // Validation flags
   bool _tipeObservasiError = false;
   bool _kategoriError = false;
   bool _subKategoriError = false;
 
+
+  List<Map<String, dynamic>> tipeObservasiOptions = [];
+  Future<List<Map<String, dynamic>>> fetchTipeObservasis() async {
+    final response = await http.get(Uri.parse('${url}TipeObservasi'));
+
+    if (response.statusCode == 200) {
+      List<dynamic> data = jsonDecode(response.body);
+      List<Map<String, dynamic>> tipeObservasi = data.map((item) => {
+        'id': item['id'],
+        'nama': item['nama'],
+      }).toList();
+      return tipeObservasi;
+    } else {
+      throw Exception('Failed to load Lokasi Observasi');
+    }
+  }
+  @override
+  void initState() {
+    super.initState();
+    _fetchCategories();
+    fetchTipeObservasis().then((data) {
+      setState(() {
+        tipeObservasiOptions = data;
+      });
+    });
+  }
+
+  List<Map<String, dynamic>> _firstOptions = [];
+  Map<String, List<Map<String, dynamic>>> _secondOptions = {};
+  Future<void> _fetchCategories() async {
+    final response = await http.get(Uri.parse('${url}Kategori'));
+    if (response.statusCode == 200) {
+      final List<dynamic> data = json.decode(response.body);
+      final List<Map<String, dynamic>> firstOptions = [];
+      final Map<String, List<Map<String, dynamic>>> secondOptions = {};
+
+      for (var item in data) {
+        final category = item as Map<String, dynamic>;
+        if (category['kategori_id'] == null) {
+          firstOptions.add({
+            'id': category['id'],
+            'nama': category['nama'],
+          });
+        } else {
+          final parentCategory = data.firstWhere((cat) => cat['id'] == category['kategori_id']);
+          final parentCategoryName = parentCategory['nama'];
+
+          if (!secondOptions.containsKey(parentCategoryName)) {
+            secondOptions[parentCategoryName] = [];
+          }
+          secondOptions[parentCategoryName]!.add({
+            'id': category['id'],
+            'nama': category['nama'],
+          });
+        }
+      }
+
+      setState(() {
+        _firstOptions = firstOptions;
+        _secondOptions = secondOptions;
+      });
+    }
+  }
+
   void _validateAndProceed() {
+    final globalState = Provider.of<GlobalStateFE>(context, listen: false);
+
     setState(() {
-      // Validate each field
-      _tipeObservasiError = _selectedValue4 == null;
-      _kategoriError = _selectedFirstCharacter == null;
-      _subKategoriError = _selectedFirstCharacter != null && _selectedSecondCharacter == null;
+      _tipeObservasiError = globalState.selectedTipeObservasiId == null;
+      _kategoriError = globalState.selectedKategori == null;
+      _subKategoriError = globalState.selectedSubKategoriId == null;
     });
 
-    // If all fields are valid, proceed to the next page
     if (!_tipeObservasiError && !_kategoriError && !_subKategoriError) {
       Navigator.push(
         context,
-        MaterialPageRoute(builder: (context) => const UserFormPage2FE()),
+        MaterialPageRoute(
+          builder: (context) => const UserFormPage2FE(),
+        ),
       );
     }
   }
 
-
-
   @override
   Widget build(BuildContext context) {
+    final globalState = Provider.of<GlobalStateFE>(context);
+
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.blue[700],
         title: const Center(
-          child: Text(
-              'OBSERVATION CLASSIFICATION',
-          ),
+          child: Text('OBSERVATION CLASSIFICATION'),
         ),
         automaticallyImplyLeading: false,
       ),
@@ -90,32 +133,27 @@ class _UserFormPage1FEState extends State<UserFormPage1FE> {
                   children: [
                     const Text.rich(
                       TextSpan(
-                          text: 'Tipe Observasi',
-                          style: TextStyle(
-                              color: Colors.black,
-                              fontSize: 18,
-                              fontWeight: FontWeight.bold
-                          ),children: <TextSpan>[
-                        TextSpan(
-                          text: ' *',
-                          style: TextStyle(color: Colors.red, fontSize: 18),
-                        ),
-                      ]
+                        text: 'Tipe Observasi',
+                        style: TextStyle(color: Colors.black, fontSize: 18, fontWeight: FontWeight.bold),
+                        children: <TextSpan>[
+                          TextSpan(text: ' *', style: TextStyle(color: Colors.red, fontSize: 18)),
+                        ],
                       ),
                     ),
-                    const SizedBox(height: 16.0), // Space between title and options
-                    // Generate RadioListTile widgets dynamically from options1 array
-                    ...options4.map((option) => RadioListTile<String>(
-                      title: Text(option),
-                      value: option,
-                      groupValue: _selectedValue4,
-                      onChanged: (value) {
-                        setState(() {
-                          _selectedValue4 = value;
-                          _tipeObservasiError = false;
-                        });
-                      },
-                    )),
+                    const SizedBox(height: 16.0),
+                    ...tipeObservasiOptions.map((option) {
+                      return RadioListTile(
+                        title: Text(option['nama']),
+                        value: option['id'],
+                        groupValue: globalState.selectedTipeObservasiId,
+                        onChanged: (value) {
+                          setState(() {
+                            globalState.updateTipeObservasi(value!);
+                            _tipeObservasiError = false;
+                          });
+                        },
+                      );
+                    }),
                     if (_tipeObservasiError)
                       Padding(
                         padding: const EdgeInsets.only(top: 8.0),
@@ -139,35 +177,27 @@ class _UserFormPage1FEState extends State<UserFormPage1FE> {
                   children: [
                     const Text.rich(
                       TextSpan(
-                          text: 'Kategory / Category',
-                          style: TextStyle(
-                              color: Colors.black,
-                              fontSize: 18,
-                              fontWeight: FontWeight.bold
-                          ),children: <TextSpan>[
-                        TextSpan(
-                          text: ' *',
-                          style: TextStyle(color: Colors.red, fontSize: 18),
-                        ),
-                      ]
+                        text: 'Kategori / Category',
+                        style: TextStyle(color: Colors.black, fontSize: 18, fontWeight: FontWeight.bold),
+                        children: <TextSpan>[
+                          TextSpan(text: ' *', style: TextStyle(color: Colors.red, fontSize: 18)),
+                        ],
                       ),
                     ),
                     const SizedBox(height: 16.0),
-                    ...firstOptions.map((option) {
-                      return Material(
-                        child: RadioListTile<String>(
-                          title: Text(option),
-                          value: option,
-                          groupValue: _selectedFirstCharacter,
-                          onChanged: (String? value) {
-                            setState(() {
-                              _selectedFirstCharacter = value;
-                              _selectedSecondCharacter = null;// Reset the second selection
-                              _kategoriError = false;
-                              _subKategoriError = false;
-                            });
-                          },
-                        ),
+                    ..._firstOptions.map((option) {
+                      return RadioListTile(
+                        title: Text(option['nama']),
+                        value: option['nama'],
+                        groupValue: globalState.selectedKategori,
+                        onChanged: (value) {
+                          setState(() {
+                            globalState.updateKategori(value!);
+                            _kategoriError = false;
+                            // Reset Sub-Kategori if Kategori changes
+                            globalState.updateSubKategori(null);
+                          });
+                        },
                       );
                     }),
                     if (_kategoriError)
@@ -182,7 +212,7 @@ class _UserFormPage1FEState extends State<UserFormPage1FE> {
                 ),
               ),
               const SizedBox(height: 16.0),
-              if (_selectedFirstCharacter != null)
+              if (globalState.selectedKategori != null)
                 Container(
                   padding: const EdgeInsets.all(16.0),
                   decoration: BoxDecoration(
@@ -194,47 +224,39 @@ class _UserFormPage1FEState extends State<UserFormPage1FE> {
                     children: [
                       Text.rich(
                         TextSpan(
-                            text: 'Sub-Category $_selectedFirstCharacter',
-                            style: const TextStyle(
-                                color: Colors.black,
-                                fontSize: 18,
-                                fontWeight: FontWeight.bold
-                            ),children: const <TextSpan>[
-                          TextSpan(
-                            text: ' *',
-                            style: TextStyle(color: Colors.red, fontSize: 18),
-                          ),
-                        ]
+                          text: 'Sub-Category ${globalState.selectedKategori}',
+                          style: const TextStyle(color: Colors.black, fontSize: 18, fontWeight: FontWeight.bold),
+                          children: const <TextSpan>[
+                            TextSpan(text: ' *', style: TextStyle(color: Colors.red, fontSize: 18)),
+                          ],
                         ),
                       ),
                       const SizedBox(height: 16.0),
-                      ...secondOptions[_selectedFirstCharacter]!.map((option) {
-                        return Material(
-                          child: RadioListTile<String>(
-                            title: Text(option),
-                            value: option,
-                            groupValue: _selectedSecondCharacter,
-                            onChanged: (String? value) {
-                              setState(() {
-                                _selectedSecondCharacter = value;
-                                _subKategoriError = false;
-                              });
-                            },
-                          ),
+                      ...(_secondOptions[globalState.selectedKategori] ?? []).map((option) {
+                        return RadioListTile<int>(
+                          title: Text(option['nama']),
+                          value: option['id'],
+                          groupValue: globalState.selectedSubKategoriId,
+                          onChanged: (value) {
+                            setState(() {
+                              globalState.updateSubKategori(value!);
+                              _subKategoriError = false;
+                            });
+                          },
                         );
                       }),
                       if (_subKategoriError)
                         Padding(
                           padding: const EdgeInsets.only(top: 8.0),
                           child: Text(
-                            'Sub-Category wajib diisi.',
+                            'Sub Kategori wajib diisi.',
                             style: TextStyle(color: Colors.red.shade700),
                           ),
                         ),
                     ],
                   ),
                 ),
-              const SizedBox(height: 10),
+              const SizedBox(height: 32.0),
               Row(
                 mainAxisAlignment: MainAxisAlignment.end,
                 children: [
@@ -261,12 +283,10 @@ class _UserFormPage1FEState extends State<UserFormPage1FE> {
                           'Next',
                           style: TextStyle(
                               fontSize: 16
-                          ),
-                        ),
+                          ),),
                       ),
                     ],
                   ),
-
                 ],
               ),
             ],

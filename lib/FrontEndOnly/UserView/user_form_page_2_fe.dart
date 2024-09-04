@@ -1,6 +1,12 @@
 
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
+import 'package:fluttersip/FrontEndOnly/Service/global_service_fe.dart';
 import 'package:fluttersip/FrontEndOnly/UserView/user_form_page_3_fe.dart';
+import 'package:fluttersip/constants/constants.dart';
+import 'package:http/http.dart' as http;
+import 'package:provider/provider.dart';
 
 class UserFormPage2FE extends StatefulWidget {
   const UserFormPage2FE({super.key});
@@ -12,28 +18,34 @@ class UserFormPage2FE extends StatefulWidget {
 
 class _UserFormPage2FEState extends State<UserFormPage2FE> {
 
+  List<Map<String, dynamic>> _Clsrs = [];
 
-  String? _selectedValue5; // For first question (radio list)
+  @override
+  void initState() {
+    super.initState();
+    _fetchClsr();
+  }
 
-  // Arrays for radio list options
-  final List<String> options5 = [
-    'Kategori Non-CLSR','CLSR Elemen 1 - Tools and Equipment (Peralatan dan Perlengkapan)',
-    'CLSR Elemen 2 - Safe Zone Position (Posisi Zona Aman)','CLSR Elemen 3 - Permit to Work (Ijin Kerja)',
-    'CLSR Elemen 4 - Energy Isolation (Isolasi Energi)','CLSR Elemen 5 - Confined Space (Ruang Terbatas)',
-    'CLSR Elemen 6 - Lifting Operation (Operasi Pengangkatan)','CLSR Elemen 7 - Fit to Work (Fit untuk Bekerja)',
-    'CLSR Elemen 8 - Working at Height (Bekerja di Ketinggian)','CLSR Elemen 9 - Personal Floatation Device (Perangkat Apung Pribadi)',
-    'CLSR Elemen 10 - System Override (Peralatan keselamatan kritikal harus berfungsi dengan baik untuk menjaga keselamatan anda.)','CLSR Elemen 11 - Asset Integrity (Integritas Aset)',
-    'CLSR Elemen 12 - Driving Safety (Keselamatan Berkendara)'
-  ];
+  Future<void> _fetchClsr() async {
+    final response = await http.get(Uri.parse('${url}CLSR'));
+    if (response.statusCode == 200) {
+      final List<dynamic> data = json.decode(response.body);
+      setState(() {
+        _Clsrs = data.map((item) => item as Map<String, dynamic>).toList();
+      });
+    }
+  }
+
 
   // Validation flags
   bool _tipeCLSRError = false;
 
 
   void _validateAndProceed() {
+    final globalState = Provider.of<GlobalStateFE>(context, listen: false);
     setState(() {
       // Validate each field
-      _tipeCLSRError = _selectedValue5 == null;
+      _tipeCLSRError = globalState.selectedClsrId == null;
 
     });
 
@@ -48,6 +60,8 @@ class _UserFormPage2FEState extends State<UserFormPage2FE> {
 
   @override
   Widget build(BuildContext context) {
+    final globalState = Provider.of<GlobalStateFE>(context);
+
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.blue[700],
@@ -118,13 +132,13 @@ class _UserFormPage2FEState extends State<UserFormPage2FE> {
                     ),
                     const SizedBox(height: 16.0), // Space between title and options
                     // Generate RadioListTile widgets dynamically from options1 array
-                    ...options5.map((option) => RadioListTile<String>(
-                      title: Text(option),
-                      value: option,
-                      groupValue: _selectedValue5,
+                    ..._Clsrs.map((item) => RadioListTile(
+                      title: Text('${item['nama'] ?? 'Unknown'} - ${item['deskripsi'] ?? ''}'),
+                      value: item['id'],
+                      groupValue: globalState.selectedClsrId,
                       onChanged: (value) {
                         setState(() {
-                          _selectedValue5 = value;
+                          globalState.updateClsr(value!);
                           _tipeCLSRError = false;
                         });
                       },

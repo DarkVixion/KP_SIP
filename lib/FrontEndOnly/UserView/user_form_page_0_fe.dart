@@ -1,6 +1,12 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
+import 'package:fluttersip/FrontEndOnly/Service/global_service_fe.dart';
 import 'package:fluttersip/FrontEndOnly/UserView/user_form_page_1_fe.dart';
+import 'package:fluttersip/constants/constants.dart';
 import 'package:intl/intl.dart';
+import 'package:http/http.dart' as http;
+import 'package:provider/provider.dart';
 
 class UserFormPage0FE extends StatefulWidget {
   const UserFormPage0FE({super.key});
@@ -10,26 +16,39 @@ class UserFormPage0FE extends StatefulWidget {
 }
 
 class _UserFormPage0FEState extends State<UserFormPage0FE> {
-  String? _selectedValue1; // For location selection (radio list)
-  final TextEditingController _textController1 = TextEditingController(); // For "Nama Pegawai"
-  final TextEditingController _textController2 = TextEditingController(); // For "Lokasi Spesifik"
-  final TextEditingController _textController3 = TextEditingController(); // For "Email Pekerja"
-  final TextEditingController _textController4 = TextEditingController(); // For "Nama Fungsi / Prodi"
-  DateTime? _selectedDate; // For date picker
+  final TextEditingController _namaPegawaiController = TextEditingController();
+  final TextEditingController _emailPekerjaController = TextEditingController();
+  final TextEditingController _namaFungsiController = TextEditingController();
+  final TextEditingController _lokasiSpesifikController = TextEditingController();
 
-  // Arrays for radio list options
-  final List<String> options1 = [
-    'Gedung Rektorat',
-    'Gedung Griya Legita',
-    'Gedung LST (Laboratoria Sains dan Teknik)',
-    'Gedung GOR 1',
-    'Gedung GOR 2',
-    'Kantin',
-    'Lab Kontainer',
-    'Lingkungan Universitas Pertamina'
-  ];
 
-  // Validation flags
+
+  List<Map<String, dynamic>> lokasiOptions = [];
+
+  Future<List<Map<String, dynamic>>> fetchLokasi() async {
+    final response = await http.get(Uri.parse('${url}Lokasi'));
+
+    if (response.statusCode == 200) {
+      List<dynamic> data = jsonDecode(response.body);
+      List<Map<String, dynamic>> lokasiObservasi = data.map((item) => {
+        'id': item['id'],
+        'nama': item['nama'],
+      }).toList();
+      return lokasiObservasi;
+    } else {
+      throw Exception('Failed to load Lokasi Observasi');
+    }
+  }
+  @override
+  void initState() {
+    super.initState();
+    fetchLokasi().then((data) {
+      setState(() {
+        lokasiOptions = data;
+      });
+    });
+  }
+
   bool _namaPegawaiError = false;
   bool _emailPekerjaError = false;
   bool _namaFungsiError = false;
@@ -38,29 +57,31 @@ class _UserFormPage0FEState extends State<UserFormPage0FE> {
   bool _tanggalObservasiError = false;
 
   Future<void> _selectDate(BuildContext context) async {
+    final globalState = Provider.of<GlobalStateFE>(context);
     final DateTime? pickedDate = await showDatePicker(
       context: context,
-      initialDate: _selectedDate ?? DateTime.now(),
+      initialDate: globalState.selectedTanggal ?? DateTime.now(),
       firstDate: DateTime(2000),
       lastDate: DateTime(2100),
     );
-    if (pickedDate != null && pickedDate != _selectedDate) {
+    if (pickedDate != null && pickedDate != globalState.selectedTanggal) {
       setState(() {
-        _selectedDate = pickedDate;
+        globalState.selectedTanggal = pickedDate;
         _tanggalObservasiError = false;
       });
     }
   }
 
   void _validateAndProceed() {
+    final globalState = Provider.of<GlobalStateFE>(context, listen: false);
     setState(() {
       // Validate each field
-      _namaPegawaiError = _textController1.text.isEmpty;
-      _emailPekerjaError = _textController3.text.isEmpty;
-      _namaFungsiError = _textController4.text.isEmpty;
-      _lokasiSpesifikError = _textController2.text.isEmpty;
-      _lokasiObservasiError = _selectedValue1 == null;
-      _tanggalObservasiError = _selectedDate == null;
+      _namaPegawaiError = _namaPegawaiController.text.isEmpty;
+      _emailPekerjaError = _namaFungsiController.text.isEmpty;
+      _namaFungsiError = _lokasiSpesifikController.text.isEmpty;
+      _lokasiSpesifikError = _emailPekerjaController.text.isEmpty;
+      _lokasiObservasiError = globalState.selectedLokasiId == null;
+      _tanggalObservasiError = globalState.selectedTanggal == null;
     });
 
     // If all fields are valid, proceed to the next page
@@ -79,6 +100,7 @@ class _UserFormPage0FEState extends State<UserFormPage0FE> {
 
   @override
   Widget build(BuildContext context) {
+    Provider.of<GlobalStateFE>(context);
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.blue[700],
@@ -94,7 +116,7 @@ class _UserFormPage0FEState extends State<UserFormPage0FE> {
               _buildTextFieldContainer(
                 label: 'Nama Pegawai',
                 isError: _namaPegawaiError,
-                controller: _textController1,
+                controller: _namaPegawaiController,
                 errorMessage: 'Nama Pegawai wajib diisi.',
               ),
               const SizedBox(height: 20),
@@ -102,7 +124,7 @@ class _UserFormPage0FEState extends State<UserFormPage0FE> {
               _buildTextFieldContainer(
                 label: 'Email Pekerja',
                 isError: _emailPekerjaError,
-                controller: _textController3,
+                controller: _emailPekerjaController,
                 errorMessage: 'Email Pekerja wajib diisi.',
               ),
               const SizedBox(height: 20),
@@ -110,7 +132,7 @@ class _UserFormPage0FEState extends State<UserFormPage0FE> {
               _buildTextFieldContainer(
                 label: 'Nama Fungsi / Prodi',
                 isError: _namaFungsiError,
-                controller: _textController4,
+                controller: _namaFungsiController,
                 errorMessage: 'Nama Fungsi / Prodi wajib diisi.',
               ),
               const SizedBox(height: 20),
@@ -124,7 +146,7 @@ class _UserFormPage0FEState extends State<UserFormPage0FE> {
               _buildTextFieldContainer(
                 label: 'Lokasi Spesifik',
                 isError: _lokasiSpesifikError,
-                controller: _textController2,
+                controller: _lokasiSpesifikController,
                 errorMessage: 'Lokasi Spesifik wajib diisi.',
                 hint: '(Lantai / Ruangan / Kelas, etc)',
               ),
@@ -196,6 +218,7 @@ class _UserFormPage0FEState extends State<UserFormPage0FE> {
 
   // Widget for building date picker container with validation
   Widget _buildDatePickerContainer() {
+    final globalState = Provider.of<GlobalStateFE>(context);
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
@@ -243,8 +266,8 @@ class _UserFormPage0FEState extends State<UserFormPage0FE> {
                   const Icon(Icons.calendar_today, color: Colors.blueGrey),
                   const SizedBox(width: 8.0),
                   Text(
-                    _selectedDate != null
-                        ? DateFormat('dd/MM/yyyy').format(_selectedDate!)
+                    globalState.selectedTanggal != null
+                        ? DateFormat('yyyy/MM/dd').format(globalState.selectedTanggal!)
                         : 'Pilih Tanggal',
                     style: const TextStyle(fontSize: 16.0),
                   ),
@@ -273,6 +296,7 @@ class _UserFormPage0FEState extends State<UserFormPage0FE> {
 
   // Widget for building radio list container with validation
   Widget _buildRadioListContainer() {
+    final globalState = Provider.of<GlobalStateFE>(context);
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
@@ -300,14 +324,14 @@ class _UserFormPage0FEState extends State<UserFormPage0FE> {
           ),
           const SizedBox(height: 16.0),
           Column(
-            children: options1.map((option) {
+            children: lokasiOptions.map((option) {
               return RadioListTile(
-                title: Text(option),
-                value: option,
-                groupValue: _selectedValue1,
+                title: Text(option['nama']),
+                value: option['id'],
+                groupValue: globalState.selectedLokasiId,
                 onChanged: (value) {
                   setState(() {
-                    _selectedValue1 = value;
+                    globalState.updateLokasiObservasi(value!);
                     _lokasiObservasiError = false;
                   });
                 },

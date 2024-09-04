@@ -1,10 +1,11 @@
-import 'package:firebase_storage/firebase_storage.dart';
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:fluttersip/FrontEndOnly/Service/global_service_fe.dart';
-import 'package:fluttersip/FrontEndOnly/UserView/user_form_page_1_fe.dart';
+import 'package:fluttersip/FrontEndOnly/UserView/user_form_page_0_fe.dart';
+import 'package:fluttersip/constants/constants.dart';
+import 'package:get_storage/get_storage.dart';
 import 'package:provider/provider.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
-
+import 'package:http/http.dart' as http;
 
 class AdminPekaPageFE extends StatefulWidget {
   const AdminPekaPageFE({super.key});
@@ -14,33 +15,83 @@ class AdminPekaPageFE extends StatefulWidget {
 }
 
 class _AdminPekaPageFEState extends State<AdminPekaPageFE> {
-  final String targetQuestionId = "Tipe Observasi";
-  Future<String?> _getImageUrl(String imagePath) async {
-    try {
-      final ref = FirebaseStorage.instance.ref().child(imagePath);
-      final url = await ref.getDownloadURL();
-      return url;
-    } catch (e) {
-      print('Error loading image: $e');
-      return null;
+  late Future<List<Map<String, dynamic>>> _fetchObservations;
+  final box = GetStorage();
+
+
+
+  Future<List<Map<String, dynamic>>> _fetchData() async {
+    final response = await http.get(Uri.parse('${url}laporans'));
+
+    if (response.statusCode == 202) {
+      final List<dynamic> data = json.decode(response.body);
+
+      // Extracting the 'tipe_observasi_id' and ensuring they are integers
+      List<int> tipeObservasiIds = data.map<int>((item) => item['tipe_observasi_id'] as int).toList();
+
+      // Fetch all TipeObservasi
+      await fetchAllTipeObservasi(tipeObservasiIds);
+
+      return data.map((item) => {
+        'timestamp': DateTime.parse(item['tanggal']),
+        // 'img': item['img'], // Use placeholder if not valid
+        'answers': [
+          {'answer': box.read('tipeObservasi_${item['tipe_observasi_id']}') ?? 'Unknown'} // Use fetched TipeObservasi name
+        ]
+      }).toList();
+    } else {
+      throw Exception('Failed to load data');
     }
   }
 
   @override
+  void initState() {
+    super.initState();
+    _fetchObservations = _fetchData(); // Initialize the Future
+  }
+  Future<void> fetchAllTipeObservasi(List<int> tipeObservasiIds) async {
+    final token = box.read('token');
+
+    // Fetch each TipeObservasi in parallel
+    await Future.wait(tipeObservasiIds.map((id) async {
+      try {
+        var response = await http.get(
+          Uri.parse('${url}TipeObservasi/$id'),
+          headers: {
+            'Accept': 'application/json',
+            'Authorization': 'Bearer $token', // Include the token
+          },
+        );
+
+        if (response.statusCode == 200) {
+          var responseBody = json.decode(response.body);
+          var tipeObservasiName = responseBody['nama'];
+
+          // Store the fetched TipeObservasi name in GetStorage using the ID as key
+          box.write('tipeObservasi_$id', tipeObservasiName);
+        } else {
+          print('Error fetching TipeObservasi $id: ${response.body}');
+        }
+      } catch (e) {
+        print('Exception fetching TipeObservasi $id: $e');
+      }
+    }));
+  }
+
+
+  @override
   Widget build(BuildContext context) {
     final globalState = Provider.of<GlobalStateFE>(context);
+
+
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.blue[400],
         title: const Text('Daftar PEKA Saya FE', textAlign: TextAlign.center),
         automaticallyImplyLeading: false,
       ),
-      body: StreamBuilder<QuerySnapshot>(
-        stream: FirebaseFirestore.instance
-            .collection('observations')
-            .orderBy('timestamp',
-            descending: false) // Order by timestamp ascending
-            .snapshots(),
+      body: FutureBuilder<List<Map<String, dynamic>>>(
+        future: _fetchObservations,
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(child: CircularProgressIndicator());
@@ -50,11 +101,11 @@ class _AdminPekaPageFEState extends State<AdminPekaPageFE> {
             return Center(child: Text('Error: ${snapshot.error}'));
           }
 
-          if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+          if (!snapshot.hasData || snapshot.data!.isEmpty) {
             return const Center(child: Text('No observations found.'));
           }
 
-          var documents = snapshot.data!.docs;
+          var documents = snapshot.data!;
 
           return ListView.builder(
             padding: const EdgeInsets.all(16.0),
@@ -63,12 +114,6 @@ class _AdminPekaPageFEState extends State<AdminPekaPageFE> {
               var doc = documents[index];
               var answers = List<Map<String, dynamic>>.from(doc['answers']);
 
-              // Sort answers by questionId
-              var filteredAnswers = answers.where((answer) => answer['questionId'] == targetQuestionId).toList();
-
-              if (filteredAnswers.isEmpty) {
-                return Container(); // Skip this item if there are no relevant answers
-              }
               return Container(
                 padding: const EdgeInsets.all(16.0),
                 margin: const EdgeInsets.symmetric(vertical: 8.0),
@@ -82,62 +127,36 @@ class _AdminPekaPageFEState extends State<AdminPekaPageFE> {
                   children: [
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
-                      children: filteredAnswers.map((answer) {
+                      children: answers.map((answer) {
                         return Padding(
                           padding: const EdgeInsets.symmetric(vertical: 4.0),
                           child: FutureBuilder<String?>(
-                            future: _getImageUrl('adminprofile.jpg'), // Static image path
+                            future: Future.value(doc['img']), // Use img from API
                             builder: (context, imageSnapshot) {
                               if (imageSnapshot.connectionState == ConnectionState.waiting) {
                                 return const CircularProgressIndicator();
                               }
 
-                              if (imageSnapshot.hasError) {
-                                return Text('Error loading image: ${imageSnapshot.error}');
-                              }
-
-                              if (imageSnapshot.hasData && imageSnapshot.data != null) {
-                                return Row(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Expanded(
-                                      child: Image.network(
-                                        imageSnapshot.data!,
-                                        height: 100, // Adjust size as needed
-                                        width: 100, // Fixed width
-                                        fit: BoxFit.cover,
-                                      ),
+                              return Row(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Expanded(
+                                    child: Image.network(
+                                      imageSnapshot.data ?? 'https://via.placeholder.com/100',
+                                      height: 100, // Adjust size as needed
+                                      width: 100, // Fixed width
+                                      fit: BoxFit.cover,
                                     ),
-                                    const SizedBox(width: 8.0), // Space between image and text
-                                    Expanded(
-                                      child: Text(
-                                        '${answer['answer']}',
-                                        style: const TextStyle(fontSize: 16),
-                                      ),
+                                  ),
+                                  const SizedBox(width: 8.0), // Space between image and text
+                                  Expanded(
+                                    child: Text(
+                                      '${answer['answer']}',
+                                      style: const TextStyle(fontSize: 16),
                                     ),
-                                  ],
-                                );
-                              } else {
-                                return Row(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Expanded(
-                                      child: Container(
-                                        width: 100, // Placeholder width for alignment
-                                        height: 100,
-                                        color: Colors.grey[200], // Placeholder color
-                                      ),
-                                    ),
-                                    const SizedBox(width: 8.0), // Space between image and text
-                                    Expanded(
-                                      child: Text(
-                                        '${answer['answer']}',
-                                        style: const TextStyle(fontSize: 16),
-                                      ),
-                                    ),
-                                  ],
-                                );
-                              }
+                                  ),
+                                ],
+                              );
                             },
                           ),
                         );
@@ -155,7 +174,7 @@ class _AdminPekaPageFEState extends State<AdminPekaPageFE> {
                         ),
                         const SizedBox(width: 4),
                         Text(
-                          doc['timestamp']?.toDate().toString() ?? 'No timestamp',
+                          doc['timestamp']?.toString() ?? 'No timestamp',
                           style: TextStyle(
                             fontSize: 16,
                             color: Colors.grey[700],
@@ -177,7 +196,7 @@ class _AdminPekaPageFEState extends State<AdminPekaPageFE> {
             onPressed: () {
               Navigator.push(
                 context,
-                MaterialPageRoute(builder: (context) => const UserFormPage1FE()),
+                MaterialPageRoute(builder: (context) => const UserFormPage0FE()),
               );
             },
             label: const Text('Tambah PEKA'),
@@ -209,8 +228,4 @@ class _AdminPekaPageFEState extends State<AdminPekaPageFE> {
       ),
     );
   }
-
-
-
-
 }

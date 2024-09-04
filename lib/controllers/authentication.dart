@@ -12,6 +12,7 @@ class AuthenticationController extends GetxController{
   final token = ''.obs;
   final userName = ''.obs;
   final userEmail = ''.obs;
+  final userID = 0.obs;
   final userRole = ''.obs;  // For storing the role name
   final userFungsiD = ''.obs;  // For storing the fungsi name
   final userFungsiJ = ''.obs;
@@ -40,13 +41,16 @@ class AuthenticationController extends GetxController{
         token.value = json.decode(response.body)['token'];
         userName.value = json.decode(response.body)['user']['name']; // Assuming the API returns user data
         userEmail.value = json.decode(response.body)['user']['email'];
+        userID.value = json.decode(response.body)['user']['id'];
         var roleId = json.decode(response.body)['user']['role_id'];
         var fungsiId = json.decode(response.body)['user']['fungsi_id'];
+
 
 
         box.write('token', token.value);
         box.write('userName', userName.value);
         box.write('userEmail', userEmail.value);
+        box.write('userID', userID.value);
 
         // Fetch role and fungsi
         await fetchRole(roleId);
@@ -136,10 +140,12 @@ class AuthenticationController extends GetxController{
         box.remove('userEmail');
         box.remove('userRole');
         box.remove('userFungsi');
+        box.remove('userID');
         token.value = '';
         userName.value = '';
         userEmail.value = '';
         userRole.value = '';
+        userID.value = 0;
         userFungsiD.value = '';
         // Redirect the user to the login screen (or another appropriate page)
         Get.offAll(() => const LoginPageFE());
