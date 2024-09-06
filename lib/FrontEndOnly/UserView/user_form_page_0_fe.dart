@@ -31,7 +31,7 @@ class _UserFormPage0FEState extends State<UserFormPage0FE> {
     if (response.statusCode == 200) {
       List<dynamic> data = jsonDecode(response.body);
       List<Map<String, dynamic>> lokasiObservasi = data.map((item) => {
-        'id': item['id'],
+        'id': item['id'].toString(),
         'nama': item['nama'],
       }).toList();
       return lokasiObservasi;
@@ -42,6 +42,22 @@ class _UserFormPage0FEState extends State<UserFormPage0FE> {
   @override
   void initState() {
     super.initState();
+    _namaPegawaiController.addListener(() {
+      Provider.of<GlobalStateFE>(context, listen: false)
+          .updateNamaPegawai(_namaPegawaiController.text);
+    });
+    _emailPekerjaController.addListener(() {
+      Provider.of<GlobalStateFE>(context, listen: false)
+          .updateEmailPekerja(_emailPekerjaController.text);
+    });
+    _namaFungsiController.addListener(() {
+      Provider.of<GlobalStateFE>(context, listen: false)
+          .updateNamaFungsi(_namaFungsiController.text);
+    });
+    _lokasiSpesifikController.addListener(() {
+      Provider.of<GlobalStateFE>(context, listen: false)
+          .updateLokasiSpesifik(_lokasiSpesifikController.text);
+    });
     fetchLokasi().then((data) {
       setState(() {
         lokasiOptions = data;
@@ -57,7 +73,7 @@ class _UserFormPage0FEState extends State<UserFormPage0FE> {
   bool _tanggalObservasiError = false;
 
   Future<void> _selectDate(BuildContext context) async {
-    final globalState = Provider.of<GlobalStateFE>(context);
+    final globalState = Provider.of<GlobalStateFE>(context, listen: false);
     final DateTime? pickedDate = await showDatePicker(
       context: context,
       initialDate: globalState.selectedTanggal ?? DateTime.now(),
@@ -76,10 +92,10 @@ class _UserFormPage0FEState extends State<UserFormPage0FE> {
     final globalState = Provider.of<GlobalStateFE>(context, listen: false);
     setState(() {
       // Validate each field
-      _namaPegawaiError = _namaPegawaiController.text.isEmpty;
-      _emailPekerjaError = _namaFungsiController.text.isEmpty;
-      _namaFungsiError = _lokasiSpesifikController.text.isEmpty;
-      _lokasiSpesifikError = _emailPekerjaController.text.isEmpty;
+      _namaPegawaiError = globalState.namaPegawai.isEmpty;
+      _emailPekerjaError = globalState.emailPekerja.isEmpty;
+      _namaFungsiError = globalState.namaFungsi.isEmpty;
+      _lokasiSpesifikError = globalState.lokasiSpesifik.isEmpty;
       _lokasiObservasiError = globalState.selectedLokasiId == null;
       _tanggalObservasiError = globalState.selectedTanggal == null;
     });
@@ -267,7 +283,7 @@ class _UserFormPage0FEState extends State<UserFormPage0FE> {
                   const SizedBox(width: 8.0),
                   Text(
                     globalState.selectedTanggal != null
-                        ? DateFormat('yyyy/MM/dd').format(globalState.selectedTanggal!)
+                        ? DateFormat('dd/MM/yyyy').format(globalState.selectedTanggal!)
                         : 'Pilih Tanggal',
                     style: const TextStyle(fontSize: 16.0),
                   ),

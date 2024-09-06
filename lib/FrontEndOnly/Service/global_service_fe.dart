@@ -11,6 +11,7 @@ import 'package:get_storage/get_storage.dart';
 
 
 
+
 class GlobalStateFE with ChangeNotifier {
   static final GlobalStateFE _instance = GlobalStateFE._internal();
 
@@ -49,32 +50,51 @@ class GlobalStateFE with ChangeNotifier {
   }
 
 
-  String? selectedKategori;
-  String? namaPegawaiController;
-  String? emailPekerjaController;
-  String? namaFungsiController;
-  String? lokasiSpesifikController;
-  DateTime? selectedTanggal;
-  int? _selectedTipeObservasiId;
-  int? _selectedSubKategoriId;
-  int? _selectedClsr;
-  int? _selectedLokasiId;
-  int? get selectedLokasiId => _selectedLokasiId;
-  int? get selectedClsrId => _selectedClsr;
-  int? get selectedTipeObservasiId => _selectedTipeObservasiId;
-  int? get selectedSubKategoriId => _selectedSubKategoriId;
 
-  void updateClsr(int? id) {
+  String namaPegawai = '';
+  String emailPekerja = '';
+  String namaFungsi = '';
+  String lokasiSpesifik = '';
+  String deskripsiObservasi = '';
+  String directAction = '';
+  String saranAplikasi = '';
+
+  String? selectedKategori;
+
+  DateTime? selectedTanggal;
+
+  String? _selectedTipeObservasiId;
+  String? _selectedSubKategoriId;
+  String? _selectedClsr;
+  String? _selectedLokasiId;
+
+  String? get selectedLokasiId => _selectedLokasiId;
+  String? get selectedClsrId => _selectedClsr;
+  String? get selectedTipeObservasiId => _selectedTipeObservasiId;
+  String? get selectedSubKategoriId => _selectedSubKategoriId;
+  String? _userId;
+
+  // Getter for userId
+  String? get userId => _userId;
+
+  // Method to load userId from GetStorage
+  void updateUserId(String? value) {
+    _userId = value;  // 'userID' should match the key used when storing the ID
+    notifyListeners();  // Notify UI that userID has been updated
+  }
+
+
+  void updateClsr(String? id) {
     _selectedClsr = id;
     notifyListeners();
   }
 
-  void updateSubKategori(int? id) {
+  void updateSubKategori(String? id) {
     _selectedSubKategoriId = id;
     notifyListeners();
   }
 
-  void updateTipeObservasi(int id) {
+  void updateTipeObservasi(String id) {
     _selectedTipeObservasiId = id;
     notifyListeners();
   }
@@ -85,28 +105,43 @@ class GlobalStateFE with ChangeNotifier {
     notifyListeners();
   }
 
-  void updateLokasiObservasi(int lokasi) {
+  void updateLokasiObservasi(String? lokasi) {
     _selectedLokasiId = lokasi;
     notifyListeners();
   }
 
-  void updateNamaPegawai(String nama) {
-    namaPegawaiController = nama;
+  void updateNamaPegawai(String value) {
+    namaPegawai = value;
     notifyListeners();
   }
 
-  void updateEmailPekerja(String email) {
-    emailPekerjaController = email;
+  void updateEmailPekerja(String value) {
+    emailPekerja = value;
     notifyListeners();
   }
 
-  void updateLokasiSpesifik(String lokasi) {
-    lokasiSpesifikController = lokasi;
+  void updateNamaFungsi(String value) {
+    namaFungsi = value;
     notifyListeners();
   }
 
-  void updateNamaFungsiProdi(String fungsi) {
-    namaFungsiController = fungsi;
+  void updatedeskripsiObservasi(String value) {
+    deskripsiObservasi = value;
+    notifyListeners();
+  }
+
+  void updatedirectAction(String value) {
+    directAction = value;
+    notifyListeners();
+  }
+
+  void updatesaranAplikasi(String value) {
+    saranAplikasi = value;
+    notifyListeners();
+  }
+
+  void updateLokasiSpesifik(String value) {
+    lokasiSpesifik = value;
     notifyListeners();
   }
 

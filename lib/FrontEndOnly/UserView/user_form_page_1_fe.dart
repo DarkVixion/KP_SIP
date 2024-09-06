@@ -30,7 +30,7 @@ class _UserFormPage1FEState extends State<UserFormPage1FE> {
     if (response.statusCode == 200) {
       List<dynamic> data = jsonDecode(response.body);
       List<Map<String, dynamic>> tipeObservasi = data.map((item) => {
-        'id': item['id'],
+        'id': item['id'].toString(),
         'nama': item['nama'],
       }).toList();
       return tipeObservasi;
@@ -62,7 +62,7 @@ class _UserFormPage1FEState extends State<UserFormPage1FE> {
         final category = item as Map<String, dynamic>;
         if (category['kategori_id'] == null) {
           firstOptions.add({
-            'id': category['id'],
+            'id': category['id'].toString(),
             'nama': category['nama'],
           });
         } else {
@@ -73,7 +73,7 @@ class _UserFormPage1FEState extends State<UserFormPage1FE> {
             secondOptions[parentCategoryName] = [];
           }
           secondOptions[parentCategoryName]!.add({
-            'id': category['id'],
+            'id': category['id'].toString(),
             'nama': category['nama'],
           });
         }
@@ -233,7 +233,7 @@ class _UserFormPage1FEState extends State<UserFormPage1FE> {
                       ),
                       const SizedBox(height: 16.0),
                       ...(_secondOptions[globalState.selectedKategori] ?? []).map((option) {
-                        return RadioListTile<int>(
+                        return RadioListTile(
                           title: Text(option['nama']),
                           value: option['id'],
                           groupValue: globalState.selectedSubKategoriId,

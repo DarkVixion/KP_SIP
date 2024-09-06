@@ -1,7 +1,7 @@
 
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
+
 import 'package:fluttersip/FrontEndOnly/Service/global_service_fe.dart';
 import 'package:fluttersip/FrontEndOnly/profile_page_fe.dart';
 // import 'package:fluttersip/testcode.dart';
@@ -23,28 +23,7 @@ class _AdminHomePageFEState extends State<AdminHomePageFE> {
 
   int totalPekaCount = 0;
 
-  @override
-  void initState() {
-    super.initState();
-    _fetchPekaCount();
-  }
-  Future<void> _fetchPekaCount() async {
-    try {
-      // Fetch all documents in the 'observations' collection
-      QuerySnapshot querySnapshot = await FirebaseFirestore.instance
-          .collection('observations')
-          .get();
 
-      // Count the number of documents
-      int count = querySnapshot.docs.length;
-
-      setState(() {
-        totalPekaCount = count;
-      });
-    } catch (e) {
-      print('Error fetching data: $e');
-    }
-  }
 
   bool isDownloading = false;
   String progress = '';
@@ -99,6 +78,7 @@ class _AdminHomePageFEState extends State<AdminHomePageFE> {
     var userName = box.read('userName');
     // var userEmail = box.read('userEmail');
     var userRole = box.read('userRole');
+    var userId = box.read('userID');
     // var userFungsiD = box.read('userFungsiD');
     // var userFungsiJ = box.read('userFungsiJ');
     final globalState = Provider.of<GlobalStateFE>(context);
@@ -139,7 +119,7 @@ class _AdminHomePageFEState extends State<AdminHomePageFE> {
               },
             ),
           ),
-          body: StreamBuilder<QuerySnapshot>(
+          body: StreamBuilder<Object>(
             stream: null,
             builder: (context, snapshot) {
               return SingleChildScrollView(
@@ -237,9 +217,9 @@ class _AdminHomePageFEState extends State<AdminHomePageFE> {
                         ],
                       ),
                       const SizedBox(height: 16),
-                      const Row(
+                       const Row(
                         children: [
-                          Expanded(
+                          const Expanded(
                             child: _PekaCard(
                               title: 'Rejected',
                               icon: Icon(Icons.cancel,
@@ -247,11 +227,11 @@ class _AdminHomePageFEState extends State<AdminHomePageFE> {
                               count: 0,
                             ),
                           ),
-                          SizedBox(width: 16),
+                          const SizedBox(width: 16),
                           Expanded(
                             child: _PekaCard(
                               title: 'Overdue',
-                              icon: Icon(Icons.calendar_today,
+                              icon: const Icon(Icons.calendar_today,
                                   color: Color.fromARGB(255, 117, 117, 117)),
                               count: 0,
                             ),

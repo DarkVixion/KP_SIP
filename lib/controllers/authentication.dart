@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:fluttersip/FrontEndOnly/Service/global_service_fe.dart';
 import 'package:fluttersip/FrontEndOnly/login_page_fe.dart';
 import 'package:fluttersip/FrontEndOnly/main_page_fe.dart';
 import 'package:fluttersip/constants/constants.dart';
@@ -12,7 +13,7 @@ class AuthenticationController extends GetxController{
   final token = ''.obs;
   final userName = ''.obs;
   final userEmail = ''.obs;
-  final userID = 0.obs;
+  final userID = ''.obs;
   final userRole = ''.obs;  // For storing the role name
   final userFungsiD = ''.obs;  // For storing the fungsi name
   final userFungsiJ = ''.obs;
@@ -41,11 +42,13 @@ class AuthenticationController extends GetxController{
         token.value = json.decode(response.body)['token'];
         userName.value = json.decode(response.body)['user']['name']; // Assuming the API returns user data
         userEmail.value = json.decode(response.body)['user']['email'];
-        userID.value = json.decode(response.body)['user']['id'];
+        userID.value = json.decode(response.body)['user']['id'].toString();
         var roleId = json.decode(response.body)['user']['role_id'];
         var fungsiId = json.decode(response.body)['user']['fungsi_id'];
 
 
+        // Update userId in GlobalStateFE
+        GlobalStateFE().updateUserId(userID.value);
 
         box.write('token', token.value);
         box.write('userName', userName.value);
@@ -145,7 +148,7 @@ class AuthenticationController extends GetxController{
         userName.value = '';
         userEmail.value = '';
         userRole.value = '';
-        userID.value = 0;
+        userID.value = '';
         userFungsiD.value = '';
         // Redirect the user to the login screen (or another appropriate page)
         Get.offAll(() => const LoginPageFE());

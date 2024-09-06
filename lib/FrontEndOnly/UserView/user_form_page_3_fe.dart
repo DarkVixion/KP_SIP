@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:file_picker/file_picker.dart';
+import 'package:fluttersip/FrontEndOnly/Service/global_service_fe.dart';
 import 'dart:io';
 
-import 'package:fluttersip/FrontEndOnly/UserView/user_peka_page_fe.dart';
+import 'package:fluttersip/controllers/laporanpeka.dart';
+import 'package:get/get.dart';
+import 'package:provider/provider.dart';
 
 class UserFormPage3FE extends StatefulWidget {
   const UserFormPage3FE({super.key});
@@ -13,18 +16,43 @@ class UserFormPage3FE extends StatefulWidget {
 
 class _UserFormPage3FEState extends State<UserFormPage3FE> {
 
-  final TextEditingController _textController6 = TextEditingController(); // For second question (text input)
-  final TextEditingController _textController7 = TextEditingController();
-  final TextEditingController _textController8 = TextEditingController();
+  final TextEditingController _deskripsiObservasi = TextEditingController(); // For second question (text input)
+  final TextEditingController _directAction = TextEditingController();
+  final TextEditingController _saranAplikasi = TextEditingController();
+  final LaporanPekaController _laporanPekaController = Get.put(LaporanPekaController());
+
+
+
+
   bool _deskripsiObservasiError = false;
   bool _directActionError = false;
   bool _saranAplikasiError = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _deskripsiObservasi.addListener(() {
+      Provider.of<GlobalStateFE>(context, listen: false)
+          .updatedeskripsiObservasi(_deskripsiObservasi.text);
+    });
+    _directAction.addListener(() {
+      Provider.of<GlobalStateFE>(context, listen: false)
+          .updatedirectAction(_directAction.text);
+    });
+    _saranAplikasi.addListener(() {
+      Provider.of<GlobalStateFE>(context, listen: false)
+          .updatesaranAplikasi(_saranAplikasi.text);
+    });
+  }
+
   void _validateAndProceed() {
+    final globalState = Provider.of<GlobalStateFE>(context, listen: false);
+
     setState(() {
       // Validate each field
-      _deskripsiObservasiError = _textController6.text.isEmpty;
-      _directActionError = _textController7.text.isEmpty;
-      _saranAplikasiError = _textController8.text.isEmpty;
+      _deskripsiObservasiError = globalState.deskripsiObservasi.isEmpty;
+      _directActionError = globalState.directAction.isEmpty;
+      _saranAplikasiError = globalState.saranAplikasi.isEmpty;
 
     });
 
@@ -32,10 +60,46 @@ class _UserFormPage3FEState extends State<UserFormPage3FE> {
     if (!_deskripsiObservasiError &&
         !_directActionError &&
         !_saranAplikasiError) {
-      Navigator.push(
-        context,
-        MaterialPageRoute(builder: (context) => const UserPekaPageFE()),
-      );
+      try {
+        _laporanPekaController.submit(
+          namaPegawai: globalState.namaPegawai.toString().trim(),
+          emailPegawai: globalState.emailPekerja.toString().trim(),
+          namaFungsi: globalState.namaFungsi.toString().trim(),
+          lokasiSpesifik: globalState.lokasiSpesifik.toString().trim(),
+          deskripsiObservasi: globalState.deskripsiObservasi.toString().trim(),
+          directAction: globalState.directAction.toString().trim(),
+          saranAplikasi: globalState.saranAplikasi.toString().trim(),
+          tanggal: globalState.selectedTanggal!.toIso8601String().trim(),
+          userId: globalState.userId!.toString(),
+          lokasiId: globalState.selectedLokasiId!.toString(),
+          tipeobservasiId: globalState.selectedTipeObservasiId!.toString(),
+          kategoriId: globalState.selectedSubKategoriId!.toString(),
+          clsrId: globalState.selectedClsrId!.toString(),
+        );
+
+        // On successful submission, show a success message or navigate to another screen
+        ScaffoldMessenger.of(context).showSnackBar(
+           SnackBar(content: Text("Submission Successful ")),
+        );
+        print(globalState.userId);
+        print(globalState.namaPegawai);
+        print(globalState.emailPekerja);
+        print(globalState.namaFungsi);
+        print(globalState.selectedTanggal);
+        print(globalState.selectedLokasiId);
+        print(globalState.lokasiSpesifik);
+        print(globalState.selectedTipeObservasiId);
+        print(globalState.selectedSubKategoriId);
+        print(globalState.selectedClsrId);
+        print(globalState.deskripsiObservasi);
+        print(globalState.directAction);
+        print(globalState.saranAplikasi);
+      } catch (error) {
+        // If an error occurs during submission, show an error message
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text("Error: ${error.toString()}")),
+        );
+      }
     }
   }
 
@@ -59,7 +123,7 @@ class _UserFormPage3FEState extends State<UserFormPage3FE> {
               _buildTextFieldContainer(
                 label: 'Deskripsi Observasi / Observation Description',
                 isError: _deskripsiObservasiError,
-                controller: _textController6,
+                controller: _deskripsiObservasi,
                 errorMessage: 'Deskripsi Observasi wajib diisi.',
                 hint: 'Contoh: Terdapat genangan air yang berorama tidak sedap',
               ),
@@ -67,7 +131,7 @@ class _UserFormPage3FEState extends State<UserFormPage3FE> {
               _buildTextFieldContainer(
                 label: 'Direct Action (Tindakan Langsung)',
                 isError: _directActionError,
-                controller: _textController7,
+                controller: _directAction,
                 errorMessage: 'Direct Action wajib diisi.',
                 hint: 'Contoh: Menginformasikan kepada pihak terkait dan memberikan saran untuk segera dibersihkan/diperbaiki ',
               ),
@@ -109,7 +173,7 @@ class _UserFormPage3FEState extends State<UserFormPage3FE> {
               _buildTextFieldContainer(
                 label: 'Berikan saran anda untuk penggunaan Aplikasi ini',
                 isError: _saranAplikasiError,
-                controller: _textController8,
+                controller: _saranAplikasi,
                 errorMessage: 'Saran Aplikasi wajib diisi.',
               ),
               const SizedBox(height: 20.0),

@@ -18,21 +18,31 @@ class UserFormPage2FE extends StatefulWidget {
 
 class _UserFormPage2FEState extends State<UserFormPage2FE> {
 
-  List<Map<String, dynamic>> _Clsrs = [];
 
   @override
   void initState() {
     super.initState();
-    _fetchClsr();
+    fetchClsr().then((data) {
+      setState(() {
+        clsrOptions = data;
+      });
+    });
   }
 
-  Future<void> _fetchClsr() async {
+  List<Map<String, dynamic>> clsrOptions = [];
+  Future<List<Map<String, dynamic>>> fetchClsr() async {
     final response = await http.get(Uri.parse('${url}CLSR'));
+
     if (response.statusCode == 200) {
-      final List<dynamic> data = json.decode(response.body);
-      setState(() {
-        _Clsrs = data.map((item) => item as Map<String, dynamic>).toList();
-      });
+      List<dynamic> data = jsonDecode(response.body);
+      List<Map<String, dynamic>> clsr = data.map((item) => {
+        'id': item['id'].toString(),
+        'nama': item['nama'],
+        'deskripsi':item['deskripsi'],
+      }).toList();
+      return clsr;
+    } else {
+      throw Exception('Failed to load Lokasi Observasi');
     }
   }
 
@@ -132,9 +142,9 @@ class _UserFormPage2FEState extends State<UserFormPage2FE> {
                     ),
                     const SizedBox(height: 16.0), // Space between title and options
                     // Generate RadioListTile widgets dynamically from options1 array
-                    ..._Clsrs.map((item) => RadioListTile(
-                      title: Text('${item['nama'] ?? 'Unknown'} - ${item['deskripsi'] ?? ''}'),
-                      value: item['id'],
+                    ...clsrOptions.map((option) => RadioListTile(
+                      title: Text('${option['nama'] ?? 'Unknown'} - ${option['deskripsi'] ?? ''}'),
+                      value: option['id'],
                       groupValue: globalState.selectedClsrId,
                       onChanged: (value) {
                         setState(() {

@@ -160,14 +160,6 @@ class _LoginPageFEState extends State<LoginPageFE> {
                     ),
                   ),
                 ),
-                // ElevatedButton(onPressed: () async {
-                //   dynamic sesuatu = await LoginService().loginAccount("test@gmail.com", "user123");
-                // }, child: const Text('User Login')
-                // ),
-                // ElevatedButton(onPressed: () async {
-                //   dynamic sesuati = await LoginService().loginAccount("ironcaptain44@gmail.com", "admin123");
-                // }, child: const Text('Admin Login')
-                // ),
               ],
             ),
           ),
