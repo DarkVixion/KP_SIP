@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:fluttersip/FrontEndOnly/Service/global_service_fe.dart';
 import 'package:fluttersip/FrontEndOnly/UserView/user_form_page_1_fe.dart';
 import 'package:fluttersip/constants/constants.dart';
+import 'package:get_storage/get_storage.dart';
 import 'package:intl/intl.dart';
 import 'package:http/http.dart' as http;
 import 'package:provider/provider.dart';
@@ -42,6 +43,19 @@ class _UserFormPage0FEState extends State<UserFormPage0FE> {
   @override
   void initState() {
     super.initState();
+    var userName = box.read('userName');
+    var userEmail = box.read('userEmail');
+    var userFungsiD = box.read('userFungsiD');
+
+    _namaPegawaiController.text = userName;
+    _emailPekerjaController.text = userEmail;
+    _namaFungsiController.text = userFungsiD;
+
+    // Update the GlobalStateFE with the initial values
+    Provider.of<GlobalStateFE>(context, listen: false).updateNamaPegawai(userName);
+    Provider.of<GlobalStateFE>(context, listen: false).updateEmailPekerja(userEmail);
+    Provider.of<GlobalStateFE>(context, listen: false).updateNamaFungsi(userFungsiD);
+
     _namaPegawaiController.addListener(() {
       Provider.of<GlobalStateFE>(context, listen: false)
           .updateNamaPegawai(_namaPegawaiController.text);
@@ -54,6 +68,7 @@ class _UserFormPage0FEState extends State<UserFormPage0FE> {
       Provider.of<GlobalStateFE>(context, listen: false)
           .updateNamaFungsi(_namaFungsiController.text);
     });
+
     _lokasiSpesifikController.addListener(() {
       Provider.of<GlobalStateFE>(context, listen: false)
           .updateLokasiSpesifik(_lokasiSpesifikController.text);
@@ -63,6 +78,13 @@ class _UserFormPage0FEState extends State<UserFormPage0FE> {
         lokasiOptions = data;
       });
     });
+
+    // Set the default date to today if no date has been selected
+    final globalState = Provider.of<GlobalStateFE>(context, listen: false);
+    // ignore: prefer_conditional_assignment
+    if (globalState.selectedTanggal == null) {
+      globalState.selectedTanggal = DateTime.now();
+    }
   }
 
   bool _namaPegawaiError = false;
@@ -92,19 +114,13 @@ class _UserFormPage0FEState extends State<UserFormPage0FE> {
     final globalState = Provider.of<GlobalStateFE>(context, listen: false);
     setState(() {
       // Validate each field
-      _namaPegawaiError = globalState.namaPegawai.isEmpty;
-      _emailPekerjaError = globalState.emailPekerja.isEmpty;
-      _namaFungsiError = globalState.namaFungsi.isEmpty;
       _lokasiSpesifikError = globalState.lokasiSpesifik.isEmpty;
       _lokasiObservasiError = globalState.selectedLokasiId == null;
       _tanggalObservasiError = globalState.selectedTanggal == null;
     });
 
     // If all fields are valid, proceed to the next page
-    if (!_namaPegawaiError &&
-        !_emailPekerjaError &&
-        !_namaFungsiError &&
-        !_lokasiSpesifikError &&
+    if (!_lokasiSpesifikError &&
         !_lokasiObservasiError &&
         !_tanggalObservasiError) {
       Navigator.push(
@@ -113,10 +129,13 @@ class _UserFormPage0FEState extends State<UserFormPage0FE> {
       );
     }
   }
+  final box = GetStorage();
 
   @override
   Widget build(BuildContext context) {
     Provider.of<GlobalStateFE>(context);
+
+
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.blue[700],
@@ -134,6 +153,7 @@ class _UserFormPage0FEState extends State<UserFormPage0FE> {
                 isError: _namaPegawaiError,
                 controller: _namaPegawaiController,
                 errorMessage: 'Nama Pegawai wajib diisi.',
+                active: false,
               ),
               const SizedBox(height: 20),
               // Email Pekerja
@@ -142,6 +162,7 @@ class _UserFormPage0FEState extends State<UserFormPage0FE> {
                 isError: _emailPekerjaError,
                 controller: _emailPekerjaController,
                 errorMessage: 'Email Pekerja wajib diisi.',
+                active: false,
               ),
               const SizedBox(height: 20),
               // Nama Fungsi / Prodi
@@ -150,6 +171,7 @@ class _UserFormPage0FEState extends State<UserFormPage0FE> {
                 isError: _namaFungsiError,
                 controller: _namaFungsiController,
                 errorMessage: 'Nama Fungsi / Prodi wajib diisi.',
+                active: false,
               ),
               const SizedBox(height: 20),
               // Tanggal Observasi
@@ -193,6 +215,7 @@ class _UserFormPage0FEState extends State<UserFormPage0FE> {
     required TextEditingController controller,
     required String errorMessage,
     String? hint,
+    bool? active,
   }) {
     return Container(
       padding: const EdgeInsets.all(16.0),
@@ -221,9 +244,10 @@ class _UserFormPage0FEState extends State<UserFormPage0FE> {
           ),
           const SizedBox(height: 16.0),
           TextField(
+            enabled: active ?? true,
             controller: controller,
             decoration: InputDecoration(
-              labelText: hint ?? 'Enter text',
+              labelText: hint,
               errorText: isError ? errorMessage : null,
             ),
           ),
@@ -232,6 +256,7 @@ class _UserFormPage0FEState extends State<UserFormPage0FE> {
     );
   }
 
+  // Widget for building date picker container with validation
   // Widget for building date picker container with validation
   Widget _buildDatePickerContainer() {
     final globalState = Provider.of<GlobalStateFE>(context);
@@ -282,9 +307,8 @@ class _UserFormPage0FEState extends State<UserFormPage0FE> {
                   const Icon(Icons.calendar_today, color: Colors.blueGrey),
                   const SizedBox(width: 8.0),
                   Text(
-                    globalState.selectedTanggal != null
-                        ? DateFormat('dd/MM/yyyy').format(globalState.selectedTanggal!)
-                        : 'Pilih Tanggal',
+                    // If no date is selected, use today's date as default
+                    DateFormat('dd/MM/yyyy').format(globalState.selectedTanggal ?? DateTime.now()),
                     style: const TextStyle(fontSize: 16.0),
                   ),
                 ],
@@ -309,6 +333,7 @@ class _UserFormPage0FEState extends State<UserFormPage0FE> {
       ),
     );
   }
+
 
   // Widget for building radio list container with validation
   Widget _buildRadioListContainer() {

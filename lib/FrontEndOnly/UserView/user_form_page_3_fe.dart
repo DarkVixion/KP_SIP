@@ -62,14 +62,14 @@ class _UserFormPage3FEState extends State<UserFormPage3FE> {
         !_saranAplikasiError) {
       try {
         _laporanPekaController.submit(
-          namaPegawai: globalState.namaPegawai.toString().trim(),
-          emailPegawai: globalState.emailPekerja.toString().trim(),
-          namaFungsi: globalState.namaFungsi.toString().trim(),
-          lokasiSpesifik: globalState.lokasiSpesifik.toString().trim(),
-          deskripsiObservasi: globalState.deskripsiObservasi.toString().trim(),
-          directAction: globalState.directAction.toString().trim(),
-          saranAplikasi: globalState.saranAplikasi.toString().trim(),
-          tanggal: globalState.selectedTanggal!.toIso8601String().trim(),
+          namaPegawai: globalState.namaPegawai.trim(),
+          emailPegawai: globalState.emailPekerja.trim(),
+          namaFungsi: globalState.namaFungsi.trim(),
+          lokasiSpesifik: globalState.lokasiSpesifik.trim(),
+          deskripsiObservasi: globalState.deskripsiObservasi.trim(),
+          directAction: globalState.directAction.trim(),
+          saranAplikasi: globalState.saranAplikasi.trim(),
+          tanggal: globalState.selectedTanggal!.toIso8601String(),
           userId: globalState.userId!.toString(),
           lokasiId: globalState.selectedLokasiId!.toString(),
           tipeobservasiId: globalState.selectedTipeObservasiId!.toString(),
@@ -81,19 +81,19 @@ class _UserFormPage3FEState extends State<UserFormPage3FE> {
         ScaffoldMessenger.of(context).showSnackBar(
            SnackBar(content: Text("Submission Successful ")),
         );
-        print(globalState.userId);
-        print(globalState.namaPegawai);
-        print(globalState.emailPekerja);
-        print(globalState.namaFungsi);
-        print(globalState.selectedTanggal);
-        print(globalState.selectedLokasiId);
-        print(globalState.lokasiSpesifik);
-        print(globalState.selectedTipeObservasiId);
-        print(globalState.selectedSubKategoriId);
-        print(globalState.selectedClsrId);
-        print(globalState.deskripsiObservasi);
-        print(globalState.directAction);
-        print(globalState.saranAplikasi);
+        // print(globalState.userId);
+        // print(globalState.namaPegawai);
+        // print(globalState.emailPekerja);
+        // print(globalState.namaFungsi);
+        // print(globalState.selectedTanggal);
+        // print(globalState.selectedLokasiId);
+        // print(globalState.lokasiSpesifik);
+        // print(globalState.selectedTipeObservasiId);
+        // print(globalState.selectedSubKategoriId);
+        // print(globalState.selectedClsrId);
+        // print(globalState.deskripsiObservasi);
+        // print(globalState.directAction);
+        // print(globalState.saranAplikasi);
       } catch (error) {
         // If an error occurs during submission, show an error message
         ScaffoldMessenger.of(context).showSnackBar(

@@ -63,7 +63,7 @@ class _AdminPekaPageFEState extends State<AdminPekaPageFE> {
           },
         );
 
-        if (response.statusCode == 200) {
+        if (response.statusCode == 205) {
           var responseBody = json.decode(response.body);
           var tipeObservasiName = responseBody['nama'];
 

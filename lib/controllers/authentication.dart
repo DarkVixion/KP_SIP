@@ -40,8 +40,8 @@ class AuthenticationController extends GetxController{
       if(response.statusCode == 200){
         isLoading.value = false;
         token.value = json.decode(response.body)['token'];
-        userName.value = json.decode(response.body)['user']['name']; // Assuming the API returns user data
-        userEmail.value = json.decode(response.body)['user']['email'];
+        userName.value = json.decode(response.body)['user']['name'].toString(); // Assuming the API returns user data
+        userEmail.value = json.decode(response.body)['user']['email'].toString();
         userID.value = json.decode(response.body)['user']['id'].toString();
         var roleId = json.decode(response.body)['user']['role_id'];
         var fungsiId = json.decode(response.body)['user']['fungsi_id'];
@@ -111,8 +111,8 @@ class AuthenticationController extends GetxController{
 
       if (response.statusCode == 200) {
         var responseBody = json.decode(response.body);
-        userFungsiD.value = responseBody['departemen'];
-        userFungsiJ.value = responseBody['jabatan'];
+        userFungsiD.value = responseBody['departemen'].toString();
+        userFungsiJ.value = responseBody['jabatan'].toString();
         box.write('userFungsiD', userFungsiD.value);
         box.write('userFungsiJ', userFungsiJ.value);
       } else {

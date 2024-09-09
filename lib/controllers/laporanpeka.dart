@@ -1,5 +1,3 @@
-import 'dart:convert';
-import 'package:flutter/material.dart';
 import 'package:fluttersip/FrontEndOnly/AdminView/admin_peka_page_fe.dart';
 import 'package:fluttersip/FrontEndOnly/UserView/user_peka_page_fe.dart';
 import 'package:fluttersip/constants/constants.dart';
@@ -28,13 +26,14 @@ class LaporanPekaController extends GetxController {
     required String tipeobservasiId,
     required String kategoriId,
     required String clsrId,
+    // required img
   }) async {
 
 
     try {
       isLoading.value = true;
       var data = {
-        'nama_pagawai': namaPegawai,
+        'nama_pegawai': namaPegawai,
         'email_pegawai' : emailPegawai,
         'nama_fungsi': namaFungsi,
         'lokasi_spesifik' : lokasiSpesifik,
@@ -47,6 +46,7 @@ class LaporanPekaController extends GetxController {
         'tipe_observasi_id': tipeobservasiId,
         'kategori_id' : kategoriId,
         'clsr_id' : clsrId,
+        // 'img' : img,
       };
 
       var response = await http.post(
@@ -67,18 +67,13 @@ class LaporanPekaController extends GetxController {
         }
       } else {
         isLoading.value = false;
-        Get.snackbar(
-          'error',
-          json.decode(response.body)['Pesan'],
-          snackPosition: SnackPosition.TOP,
-          backgroundColor: Colors.red,
-          colorText: Colors.white,
-        );
-        print(json.decode(response.body));
+        print('Input Laporan error: ${response.body}');
       }
     } catch (e) {
       isLoading.value = false;
+      print('pala bapak kau pecah');
       print(e.toString());
+      print('pala mamak kau pecah');
     }
   }
 }

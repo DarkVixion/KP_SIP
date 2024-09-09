@@ -59,14 +59,15 @@ class GlobalStateFE with ChangeNotifier {
   String directAction = '';
   String saranAplikasi = '';
 
+
   String? selectedKategori;
 
-  DateTime? selectedTanggal;
+  DateTime? selectedTanggal = DateTime.now();
 
-  String? _selectedTipeObservasiId;
+  String? _selectedTipeObservasiId = '';
   String? _selectedSubKategoriId;
-  String? _selectedClsr;
-  String? _selectedLokasiId;
+  String? _selectedClsr = '';
+  String? _selectedLokasiId = '';
 
   String? get selectedLokasiId => _selectedLokasiId;
   String? get selectedClsrId => _selectedClsr;
@@ -149,5 +150,6 @@ class GlobalStateFE with ChangeNotifier {
     selectedTanggal = date;
     notifyListeners();
   }
+
 
 }
