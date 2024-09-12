@@ -2,7 +2,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:fluttersip/FrontEndOnly/Service/global_service_fe.dart';
 import 'package:fluttersip/FrontEndOnly/login_page_fe.dart';
-import 'package:fluttersip/FrontEndOnly/main_page_fe.dart';
+import 'package:fluttersip/FrontEndOnly/Service/main_page_fe.dart';
 import 'package:fluttersip/constants/constants.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';

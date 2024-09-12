@@ -114,7 +114,10 @@ class _UserFormPage0FEState extends State<UserFormPage0FE> {
     final globalState = Provider.of<GlobalStateFE>(context, listen: false);
     setState(() {
       // Validate each field
-      _lokasiSpesifikError = globalState.lokasiSpesifik.isEmpty;
+      _namaPegawaiError = globalState.namaPegawai == null;
+      _emailPekerjaError = globalState.emailPekerja == null;
+      _namaFungsiError = globalState.namaFungsi == null;
+      _lokasiSpesifikError = globalState.lokasiSpesifik == null;
       _lokasiObservasiError = globalState.selectedLokasiId == null;
       _tanggalObservasiError = globalState.selectedTanggal == null;
     });

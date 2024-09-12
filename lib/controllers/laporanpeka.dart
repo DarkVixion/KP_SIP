@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:fluttersip/FrontEndOnly/AdminView/admin_peka_page_fe.dart';
 import 'package:fluttersip/FrontEndOnly/UserView/user_peka_page_fe.dart';
 import 'package:fluttersip/constants/constants.dart';
@@ -26,7 +28,7 @@ class LaporanPekaController extends GetxController {
     required String tipeobservasiId,
     required String kategoriId,
     required String clsrId,
-    // required img
+
   }) async {
 
 
@@ -59,6 +61,12 @@ class LaporanPekaController extends GetxController {
 
       if (response.statusCode == 201) {
         isLoading.value = false;
+
+        var laporanId = json.decode(response.body)['laporan']['id'].toString();
+
+        // After successfully creating Laporan, create Tindak Lanjut
+        await _createTindakLanjut(laporanId);
+
         var userRole = box.read('userRole');
         if (userRole == 'Admin') {
           Get.offAll(() => const AdminPekaPageFE());
@@ -71,9 +79,30 @@ class LaporanPekaController extends GetxController {
       }
     } catch (e) {
       isLoading.value = false;
-      print('pala bapak kau pecah');
       print(e.toString());
-      print('pala mamak kau pecah');
+    }
+  }
+
+  Future<void> _createTindakLanjut(String laporanId) async {
+    try {
+      var response = await http.post(
+        Uri.parse('${url}tindaklanjuts'),
+        body: {
+          'laporan_id': laporanId.toString(),
+          'tanggal': DateTime.now().toIso8601String(),
+          'tipe': 'globalState.selectedTipeObservasiId',
+          'status': 'Open',
+          'deskripsi': 'globalState.deskripsiObservasi',
+          'img': '', // If you want to include an image
+        },
+      );
+
+      if (response.statusCode != 201) {
+        throw Exception('Failed to create tindak lanjut');
+      }
+    } catch (e) {
+      print(e.toString());
+      throw e;
     }
   }
 }

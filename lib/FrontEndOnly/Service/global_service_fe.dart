@@ -62,7 +62,7 @@ class GlobalStateFE with ChangeNotifier {
 
   String? selectedKategori;
 
-  DateTime? selectedTanggal = DateTime.now();
+  DateTime? selectedTanggal;
 
   String? _selectedTipeObservasiId = '';
   String? _selectedSubKategoriId;
@@ -151,5 +151,23 @@ class GlobalStateFE with ChangeNotifier {
     notifyListeners();
   }
 
+  void resetForm() {
+    namaPegawai = '';
+    emailPekerja = '';
+    namaFungsi = '';
+    lokasiSpesifik = '';
+    deskripsiObservasi = '';
+    directAction = '';
+    saranAplikasi = '';
+    selectedKategori = '';
+    selectedTanggal = DateTime.now();
+    _selectedLokasiId = null;
+    _selectedTipeObservasiId = null;
+    _selectedSubKategoriId = null;
+    _selectedClsr = null;
+
+    // Notify listeners that the state has changed
+    notifyListeners();
+  }
 
 }

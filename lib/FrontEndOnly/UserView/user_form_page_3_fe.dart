@@ -79,8 +79,10 @@ class _UserFormPage3FEState extends State<UserFormPage3FE> {
 
         // On successful submission, show a success message or navigate to another screen
         ScaffoldMessenger.of(context).showSnackBar(
-           SnackBar(content: Text("Submission Successful ")),
+           const SnackBar(content: Text("Submission Successful ")),
         );
+        // Reset the form fields
+        globalState.resetForm();
         // print(globalState.userId);
         // print(globalState.namaPegawai);
         // print(globalState.emailPekerja);

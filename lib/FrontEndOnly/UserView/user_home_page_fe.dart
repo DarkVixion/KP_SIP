@@ -1,10 +1,12 @@
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:fluttersip/FrontEndOnly/Service/image_file_service.dart';
-
-import 'package:fluttersip/FrontEndOnly/UserView/user_peka_page_fe.dart';
+import 'package:fluttersip/FrontEndOnly/Service/global_service_fe.dart';
 import 'package:fluttersip/FrontEndOnly/profile_page_fe.dart';
+import 'package:fluttersip/constants/constants.dart';
+
+
 import 'package:get_storage/get_storage.dart';
+import 'package:provider/provider.dart';
 import 'package:toggle_switch/toggle_switch.dart';
 
 
@@ -18,27 +20,40 @@ class UserHomePageFE extends StatefulWidget {
 class _UserHomePageFEState extends State<UserHomePageFE> {
   final box = GetStorage();
 
-  int _selectedIndex = 0;
-  void _onItemTapped(int index) {
-    setState(() {
-      _selectedIndex = index;
-    });
+  int totalPekaCount = 0;
 
-    if (index == 1) {
-      Navigator.push(
-        context,
-        MaterialPageRoute(builder: (context) => const UserPekaPageFE()),
-      );
-    } else if (index == 2) {
-      Navigator.push(
-        context,
-        MaterialPageRoute(builder: (context) => const ProfilePageFE()),
-      );
+  @override
+  void initState() {
+    super.initState();
+    fetchPekaCount();  // Fetch the laporan count for the logged-in user
+  }
+
+
+  Future<void> fetchPekaCount() async {
+    Dio dio = Dio();
+    try {
+      final response = await dio.get('${url}laporans');
+      if (response.statusCode == 202) {
+        List laporans = response.data;  // Assuming the API returns a list of laporans
+        var userId = int.parse(box.read('userID'));  // Get the logged-in user's ID
+
+        // Filter laporans by userId
+        List userLaporans = laporans.where((laporan) => laporan['user_id'] == userId).toList();
+
+        setState(() {
+          totalPekaCount = userLaporans.length;  // Count the number of laporans for the logged-in user
+        });
+      }
+    } catch (e) {
+      print("Error fetching PEKA count: $e");
     }
   }
 
+
+
   @override
   Widget build(BuildContext context) {
+    final globalState = Provider.of<GlobalStateFE>(context);
     var userName = box.read('userName');
     var userRole = box.read('userRole');
     return Scaffold(
@@ -46,12 +61,7 @@ class _UserHomePageFEState extends State<UserHomePageFE> {
         actions: [
           IconButton(
             icon: const Icon(Icons.notifications),
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => const Test()),
-              );
-            },
+            onPressed: () {},
           ),
         ],
         leading: Builder(
@@ -75,7 +85,7 @@ class _UserHomePageFEState extends State<UserHomePageFE> {
           },
         ),
       ),
-      body: StreamBuilder<QuerySnapshot>(
+      body: StreamBuilder<Object>(
         stream: null,
         builder: (context, snapshot) {
           return SingleChildScrollView(
@@ -130,18 +140,18 @@ class _UserHomePageFEState extends State<UserHomePageFE> {
                         ],
                       ),
                       const SizedBox(height: 16),
-                      const Row(
+                      Row(
                         children: [
                           Expanded(
                             child: _PekaCard(
                               title: 'Total PEKA',
-                              icon: Icon(Icons.layers,
+                              icon: const Icon(Icons.layers,
                                   color: Color.fromARGB(255, 236, 34, 31)),
-                              count: 11,
+                              count: totalPekaCount,
                             ),
                           ),
-                          SizedBox(width: 16),
-                          Expanded(
+                          const SizedBox(width: 16),
+                          const Expanded(
                             child: _PekaCard(
                               title: 'On Progress',
                               icon: Icon(Icons.access_time,
@@ -188,8 +198,10 @@ class _UserHomePageFEState extends State<UserHomePageFE> {
             label: 'Profile',
           ),
         ],
-        currentIndex: _selectedIndex,
-        onTap: _onItemTapped,
+        currentIndex: globalState.selectedIndex,
+        onTap: (index) {
+          globalState.onItemTapped(index, context);
+        },
       ),
     );
   }

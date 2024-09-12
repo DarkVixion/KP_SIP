@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 
 import 'package:fluttersip/FrontEndOnly/Service/global_service_fe.dart';
 import 'package:fluttersip/FrontEndOnly/profile_page_fe.dart';
+import 'package:fluttersip/constants/constants.dart';
 // import 'package:fluttersip/testcode.dart';
 
 import 'package:get_storage/get_storage.dart';
@@ -21,7 +22,29 @@ class AdminHomePageFE extends StatefulWidget {
 
 class _AdminHomePageFEState extends State<AdminHomePageFE> {
 
+  @override
+  void initState() {
+    super.initState();
+    fetchPekaCount();
+  }
+
   int totalPekaCount = 0;
+
+  Future<void> fetchPekaCount() async {
+    Dio dio = Dio();
+    try {
+      final response = await dio.get('${url}laporans');
+      if (response.statusCode == 202) {
+        List laporans = response.data;  // Assuming the API returns a list of laporans
+        setState(() {
+          totalPekaCount = laporans.length;  // Count the number of laporans
+        });
+      }
+    } catch (e) {
+      print("Error fetching PEKA count: $e");
+    }
+  }
+
 
 
 
@@ -78,7 +101,7 @@ class _AdminHomePageFEState extends State<AdminHomePageFE> {
     var userName = box.read('userName');
     // var userEmail = box.read('userEmail');
     var userRole = box.read('userRole');
-    var userId = box.read('userID');
+
     // var userFungsiD = box.read('userFungsiD');
     // var userFungsiJ = box.read('userFungsiJ');
     final globalState = Provider.of<GlobalStateFE>(context);
@@ -219,7 +242,7 @@ class _AdminHomePageFEState extends State<AdminHomePageFE> {
                       const SizedBox(height: 16),
                        const Row(
                         children: [
-                          const Expanded(
+                          Expanded(
                             child: _PekaCard(
                               title: 'Rejected',
                               icon: Icon(Icons.cancel,
@@ -227,11 +250,11 @@ class _AdminHomePageFEState extends State<AdminHomePageFE> {
                               count: 0,
                             ),
                           ),
-                          const SizedBox(width: 16),
+                          SizedBox(width: 16),
                           Expanded(
                             child: _PekaCard(
                               title: 'Overdue',
-                              icon: const Icon(Icons.calendar_today,
+                              icon: Icon(Icons.calendar_today,
                                   color: Color.fromARGB(255, 117, 117, 117)),
                               count: 0,
                             ),
