@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:fluttersip/FrontEndOnly/AdminView/tidak_lanjut_fe.dart';
 import 'package:fluttersip/FrontEndOnly/Service/global_service_fe.dart';
 import 'package:fluttersip/constants/constants.dart';
 import 'package:get_storage/get_storage.dart';
@@ -25,70 +26,53 @@ class _AdminPekaPageFEState extends State<AdminPekaPageFE> {
 
   Future<void> _initializeData() async {
     // Step 1: Fetch and store TipeObservasi first
-    await _fetchAllTipeObservasi();
 
     // Step 2: Fetch observations after TipeObservasi has been fetched
     _fetchObservations = _fetchData();  // Fetch observations
     setState(() {});  // Trigger UI update
   }
 
-  // Fetch all available TipeObservasi and store in GetStorage
-  Future<void> _fetchAllTipeObservasi() async {
-    final token = box.read('token');
+
+
+  Future<List<Map<String, dynamic>>> _fetchData() async {
+    final token = box.read('token');  // Assuming the token is needed for authorization
 
     try {
       var response = await http.get(
-        Uri.parse('${url}TipeObservasi'),
+        Uri.parse('${url}tindaklanjuts'),  // Assuming this is the correct endpoint for tindaklanjuts
         headers: {
           'Accept': 'application/json',
-          'Authorization': 'Bearer $token', // Include the token
+          'Authorization': 'Bearer $token',  // Include the token if necessary
         },
       );
 
-      if (response.statusCode == 200) {
-        final List<dynamic> tipeObservasiList = json.decode(response.body);
+      if (response.statusCode == 202) {
+        final List<dynamic> data = json.decode(response.body);
 
-        // Store each TipeObservasi name by its ID in GetStorage
-        for (var tipeObservasi in tipeObservasiList) {
-          int id = tipeObservasi['id'];
-          String name = tipeObservasi['nama'];
-          box.write('tipeObservasi_$id', name);  // Store in GetStorage
-        }
+        // Map the data and include only 'deskripsi' and 'tanggal'
+        List<Map<String, dynamic>> tindaklanjuts = data.map((item) {
+          return {
+            'deskripsi': item['deskripsi'],
+            'tanggal': DateTime.parse(item['tanggal']),
+            'status': item['status'],
+            'tipe': item['tipe'],
+            'img': item['img'], // If you want to include an image
+          };
+        }).toList();
+
+        // Sort by 'tanggal' (newest first)
+        tindaklanjuts.sort((a, b) => b['tanggal'].compareTo(a['tanggal']));
+
+        return tindaklanjuts;
       } else {
-        print('Failed to fetch TipeObservasi: ${response.statusCode}');
+        throw Exception('Failed to load tindaklanjuts');
       }
     } catch (e) {
-      print('Error fetching TipeObservasi: $e');
+      print('Error fetching tindaklanjuts: $e');
+      throw Exception('Failed to load tindaklanjuts');
     }
   }
 
-  Future<List<Map<String, dynamic>>> _fetchData() async {
-    final response = await http.get(Uri.parse('${url}laporans'));
-
-    if (response.statusCode == 202) {
-      final List<dynamic> data = json.decode(response.body);
-
-      // Map the data and include the necessary fields
-      List<Map<String, dynamic>> observations = data.map((item) {
-        int tipeObservasiId = item['tipe_observasi_id'];
-        String tipeObservasiName = box.read('tipeObservasi_$tipeObservasiId') ?? 'Unknown';
-
-        return {
-          'timestamp': DateTime.parse(item['tanggal']),
-          'answers': [
-            {'answer': tipeObservasiName}  // Use the stored TipeObservasi name
-          ]
-        };
-      }).toList();
-
-      // Sort the observations by timestamp (newest first)
-      observations.sort((a, b) => b['timestamp'].compareTo(a['timestamp']));
-
-      return observations;
-    } else {
-      throw Exception('Failed to load data');
-    }
-  }
 
 
   @override
@@ -102,7 +86,7 @@ class _AdminPekaPageFEState extends State<AdminPekaPageFE> {
         automaticallyImplyLeading: false,
       ),
       body: FutureBuilder<List<Map<String, dynamic>>>(
-        future: _fetchObservations,  // Use the _fetchObservations Future
+        future: _fetchObservations,
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(child: CircularProgressIndicator());
@@ -113,20 +97,26 @@ class _AdminPekaPageFEState extends State<AdminPekaPageFE> {
           }
 
           if (!snapshot.hasData || snapshot.data!.isEmpty) {
-            return const Center(child: Text('No observations found.'));
+            return const Center(child: Text('No tindaklanjuts found.'));
           }
 
-          var documents = snapshot.data!;
+          var tindaklanjuts = snapshot.data!;
 
           return ListView.builder(
             padding: const EdgeInsets.all(16.0),
-            itemCount: documents.length,
+            itemCount: tindaklanjuts.length,
             itemBuilder: (context, index) {
-              var doc = documents[index];
-              var answers = List<Map<String, dynamic>>.from(doc['answers']);
+              var tindaklanjut = tindaklanjuts[index];
 
               return InkWell(
-                  onTap: () {},
+                onTap: (){
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => TindaklanjutDetailPage(tindaklanjut: tindaklanjut),
+                    ),
+                  );
+                },
                 child: Container(
                   padding: const EdgeInsets.all(16.0),
                   margin: const EdgeInsets.symmetric(vertical: 8.0),
@@ -138,42 +128,9 @@ class _AdminPekaPageFEState extends State<AdminPekaPageFE> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: answers.map((answer) {
-                          return Padding(
-                            padding: const EdgeInsets.symmetric(vertical: 4.0),
-                            child: FutureBuilder<String?>(
-                              future: Future.value(doc['img']),
-                              builder: (context, imageSnapshot) {
-                                if (imageSnapshot.connectionState == ConnectionState.waiting) {
-                                  return const CircularProgressIndicator();
-                                }
-
-                                return Row(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Expanded(
-                                      child: Image.network(
-                                        imageSnapshot.data ?? 'https://via.placeholder.com/100',
-                                        height: 100,
-                                        width: 100,
-                                        fit: BoxFit.cover,
-                                      ),
-                                    ),
-                                    const SizedBox(width: 8.0),
-                                    Expanded(
-                                      child: Text(
-                                        '${answer['answer']}',
-                                        style: const TextStyle(fontSize: 16),
-                                      ),
-                                    ),
-                                  ],
-                                );
-                              },
-                            ),
-                          );
-                        }).toList(),
+                      Text(
+                        '${tindaklanjut['deskripsi']}',
+                        style: const TextStyle(fontSize: 16),
                       ),
                       const SizedBox(height: 8.0),
                       Row(
@@ -186,7 +143,7 @@ class _AdminPekaPageFEState extends State<AdminPekaPageFE> {
                           ),
                           const SizedBox(width: 4),
                           Text(
-                            doc['timestamp']?.toString() ?? 'No timestamp',
+                            tindaklanjut['tanggal'].toString(),
                             style: TextStyle(
                               fontSize: 16,
                               color: Colors.grey[700],
@@ -202,6 +159,7 @@ class _AdminPekaPageFEState extends State<AdminPekaPageFE> {
           );
         },
       ),
+
       bottomNavigationBar: BottomNavigationBar(
         items: const [
           BottomNavigationBarItem(

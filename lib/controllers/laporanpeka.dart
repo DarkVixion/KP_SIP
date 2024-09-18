@@ -1,20 +1,19 @@
-import 'dart:convert';
-
+import 'dart:io';
+import 'package:dio/dio.dart' as dio;
 import 'package:fluttersip/FrontEndOnly/AdminView/admin_peka_page_fe.dart';
+import 'package:fluttersip/FrontEndOnly/Service/global_service_fe.dart';
 import 'package:fluttersip/FrontEndOnly/UserView/user_peka_page_fe.dart';
 import 'package:fluttersip/constants/constants.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
-import 'package:http/http.dart' as http;
 
 class LaporanPekaController extends GetxController {
+  final dio.Dio _dio = dio.Dio();
   final isLoading = false.obs;
-  final userID = 0.obs;
+
 
   final box = GetStorage();
-
-
-  Future submit({
+  Future<void> submitLaporan({
     required String namaPegawai,
     required String emailPegawai,
     required String namaFungsi,
@@ -28,45 +27,43 @@ class LaporanPekaController extends GetxController {
     required String tipeobservasiId,
     required String kategoriId,
     required String clsrId,
-
+    File? image,
   }) async {
-
-
     try {
-      isLoading.value = true;
-      var data = {
-        'nama_pegawai': namaPegawai,
-        'email_pegawai' : emailPegawai,
-        'nama_fungsi': namaFungsi,
-        'lokasi_spesifik' : lokasiSpesifik,
-        'deskripsi_observasi' : deskripsiObservasi,
-        'direct_action' : directAction,
-        'saran_aplikasi' : saranAplikasi,
+      dio.FormData formData = dio.FormData.fromMap({
         'tanggal': tanggal,
         'user_id': userId,
         'lokasi_id': lokasiId,
         'tipe_observasi_id': tipeobservasiId,
-        'kategori_id' : kategoriId,
-        'clsr_id' : clsrId,
-        // 'img' : img,
-      };
+        'kategori_id': kategoriId,
+        'clsr_id': clsrId,
+        'nama_pegawai': namaPegawai,
+        'email_pegawai': emailPegawai,
+        'nama_fungsi': namaFungsi,
+        'lokasi_spesifik': lokasiSpesifik,
+        'deskripsi_observasi': deskripsiObservasi,
+        'direct_action': directAction,
+        'saran_aplikasi': saranAplikasi,
+        if (image != null)
+          'img': await dio.MultipartFile.fromFile(image.path, filename: image.path.split('/').last),
+      });
 
-      var response = await http.post(
-        Uri.parse('${url}laporans'),
-        headers: {
-          'Accept': 'application/json',
-        },
-        body: data,
+      dio.Response response = await _dio.post(
+        '${url}laporans',
+        data: formData,
+        options: dio.Options(
+          headers: {
+            'Authorization': 'Bearer ${box.read('token')}', // If token authentication is used
+          },
+        ),
       );
 
       if (response.statusCode == 201) {
-        isLoading.value = false;
-
-        var laporanId = json.decode(response.body)['laporan']['id'].toString();
-
-        // After successfully creating Laporan, create Tindak Lanjut
+        print("Laporan created successfully: ${response.data}");
+        String laporanId = response.data['laporan']['id'].toString();
         await _createTindakLanjut(laporanId);
 
+        GlobalStateFE().resetForm();
         var userRole = box.read('userRole');
         if (userRole == 'Admin') {
           Get.offAll(() => const AdminPekaPageFE());
@@ -74,35 +71,34 @@ class LaporanPekaController extends GetxController {
           Get.offAll(() => const UserPekaPageFE());
         }
       } else {
-        isLoading.value = false;
-        print('Input Laporan error: ${response.body}');
+        print("Error: ${response.statusCode}");
       }
     } catch (e) {
-      isLoading.value = false;
-      print(e.toString());
+      print("Error submitting laporan: $e");
     }
   }
 
   Future<void> _createTindakLanjut(String laporanId) async {
     try {
-      var response = await http.post(
-        Uri.parse('${url}tindaklanjuts'),
-        body: {
-          'laporan_id': laporanId.toString(),
-          'tanggal': DateTime.now().toIso8601String(),
-          'tipe': 'globalState.selectedTipeObservasiId',
+      var response = await _dio.post(
+        '${url}tindaklanjuts',
+        data: {
+          'laporan_id': laporanId,
+          'tanggal': GlobalStateFE().selectedTanggal!.toIso8601String(),
+          'tipe': GlobalStateFE().selectedTipeObservasiId.toString(),
           'status': 'Open',
-          'deskripsi': 'globalState.deskripsiObservasi',
+          'deskripsi': GlobalStateFE().deskripsiObservasi.toString(),
           'img': '', // If you want to include an image
         },
       );
 
-      if (response.statusCode != 201) {
-        throw Exception('Failed to create tindak lanjut');
+      if (response.statusCode == 201) {
+        print('Tindak Lanjut created successfully');
+      } else {
+        print('Failed to create Tindak Lanjut. Response: ${response.data}');
       }
     } catch (e) {
-      print(e.toString());
-      throw e;
+      print('Error in _createTindakLanjut: ${e.toString()}');
     }
   }
 }

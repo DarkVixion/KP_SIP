@@ -5,7 +5,6 @@ import 'package:flutter/material.dart';
 import 'package:fluttersip/FrontEndOnly/Service/global_service_fe.dart';
 import 'package:fluttersip/FrontEndOnly/profile_page_fe.dart';
 import 'package:fluttersip/constants/constants.dart';
-// import 'package:fluttersip/testcode.dart';
 
 import 'package:get_storage/get_storage.dart';
 import 'package:path_provider/path_provider.dart';
@@ -26,10 +25,10 @@ class _AdminHomePageFEState extends State<AdminHomePageFE> {
   void initState() {
     super.initState();
     fetchPekaCount();
+    fetchOpenCount();
   }
 
   int totalPekaCount = 0;
-
   Future<void> fetchPekaCount() async {
     Dio dio = Dio();
     try {
@@ -42,6 +41,23 @@ class _AdminHomePageFEState extends State<AdminHomePageFE> {
       }
     } catch (e) {
       print("Error fetching PEKA count: $e");
+    }
+  }
+
+  int totalOpenCount = 0;
+
+  Future<void> fetchOpenCount() async {
+    Dio dio = Dio();
+    try {
+      final response = await dio.get('${url}tindaklanjuts');
+      if (response.statusCode == 202) {
+        List tindaklanjuts = response.data;  // Assuming the API returns a list of laporans
+        setState(() {
+          totalOpenCount = tindaklanjuts.length;  // Count the number of laporans
+        });
+      }
+    } catch (e) {
+      print("Error fetching Tindak Lanjut count: $e");
     }
   }
 
@@ -207,12 +223,12 @@ class _AdminHomePageFEState extends State<AdminHomePageFE> {
                             ),
                           ),
                           const SizedBox(width: 16),
-                          const Expanded(
+                          Expanded(
                             child: _PekaCard(
                               title: 'Open',
-                              icon: Icon(Icons.folder_open,
+                              icon: const Icon(Icons.folder_open,
                                 color: Color.fromARGB(255, 210, 157, 172),),
-                              count: 0,
+                              count: totalOpenCount,
                             ),
                           ),
                         ],
@@ -225,7 +241,7 @@ class _AdminHomePageFEState extends State<AdminHomePageFE> {
                               title: 'Close',
                               icon: Icon(Icons.checklist,
                                   color: Color.fromARGB(221, 50, 205, 50)),
-                              count: 8,
+                              count: 0,
                             ),
                           ),
                           SizedBox(width: 16),

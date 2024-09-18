@@ -1,3 +1,5 @@
+import 'dart:typed_data';
+
 import 'package:flutter/material.dart';
 import 'package:fluttersip/FrontEndOnly/UserView/user_form_page_0_fe.dart';
 import 'package:fluttersip/FrontEndOnly/Service/global_service_fe.dart';
@@ -23,6 +25,19 @@ class _UserPekaPageFEState extends State<UserPekaPageFE> {
     super.initState();
     _fetchObservations = _fetchData(); // Initialize the Future
   }
+  Future<Uint8List?> _fetchImageWithTimeout(String imageUrl) async {
+    try {
+      final response = await http.get(Uri.parse(imageUrl)).timeout(const Duration(seconds: 5));
+      if (response.statusCode == 200) {
+        return response.bodyBytes;  // Return image bytes if successful
+      }
+    } catch (e) {
+      print('Error fetching image: $e');
+    }
+    return null;  // Return null if failed
+  }
+
+
 
   Future<void> fetchAllTipeObservasi(List<int> tipeObservasiIds) async {
     final token = box.read('token');
@@ -38,7 +53,7 @@ class _UserPekaPageFEState extends State<UserPekaPageFE> {
           },
         );
 
-        if (response.statusCode == 205) {
+        if (response.statusCode == 203) {
           var responseBody = json.decode(response.body);
           var tipeObservasiName = responseBody['nama'];
 
@@ -75,7 +90,7 @@ class _UserPekaPageFEState extends State<UserPekaPageFE> {
       return userLaporans.map((item) {
         final tipeObservasiName = box.read('tipeObservasi_${item['tipe_observasi_id']}') ?? 'Unknown';
         return {
-          'timestamp': DateTime.parse(item['tanggal']),
+          'timestamp': DateTime.parse(item['created_at']),
           'answers': [
             {'answer': tipeObservasiName}
           ],
@@ -142,15 +157,26 @@ class _UserPekaPageFEState extends State<UserPekaPageFE> {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Expanded(
-                                child: doc['img'] != null && doc['img'].contains('http')
-                                    ? Image.network(
-                                  doc['img'],
-                                  height: 100,
-                                  width: 100,
-                                  fit: BoxFit.cover,
-                                  errorBuilder: (context, error, stackTrace) {
-                                    return Image.network(
-                                      'https://via.placeholder.com/200', // Fallback image in case of error
+                                child: doc['img'] != null && doc['img'].isNotEmpty
+                                    ? FutureBuilder<Uint8List?>(
+                                  future: _fetchImageWithTimeout('${url2}${doc['img']}'),
+                                  builder: (context, snapshot) {
+                                    if (snapshot.connectionState == ConnectionState.waiting) {
+                                      return const CircularProgressIndicator(); // Show loading indicator while fetching
+                                    }
+
+                                    if (snapshot.hasError || !snapshot.hasData) {
+                                      // Fallback image if there's an error or the image is null/empty
+                                      return Image.network(
+                                        'https://via.assets.so/img.jpg?w=50&h=50&tc=Black&bg=white&t=Tidak Ada Gambar',
+                                        height: 100,
+                                        width: 100,
+                                        fit: BoxFit.cover,
+                                      );
+                                    }
+
+                                    return Image.memory(
+                                      snapshot.data!,
                                       height: 100,
                                       width: 100,
                                       fit: BoxFit.cover,
@@ -158,21 +184,13 @@ class _UserPekaPageFEState extends State<UserPekaPageFE> {
                                   },
                                 )
                                     : Image.network(
-                                  'http://10.0.2.2:8000/storage/app/public/${doc['img']}', // Correct concatenation without extra slash
+                                  'https://via.assets.so/img.jpg?w=50&h=50&tc=Black&bg=white&t=Tidak Ada Gambar',
                                   height: 100,
                                   width: 100,
-                                  fit: BoxFit.cover,
-                                  errorBuilder: (context, error, stackTrace) {
-                                    print(error);
-                                    return Image.network(
-                                      'https://via.placeholder.com/300', // Fallback image in case of error
-                                      height: 100,
-                                      width: 100,
-                                      fit: BoxFit.cover,
-                                    );
-                                  },
+                                  fit: BoxFit.cover, // Fallback image if img is null
                                 ),
                               ),
+
                               const SizedBox(width: 8.0), // Space between image and text
                               Expanded(
                                 child: Text(
@@ -251,5 +269,4 @@ class _UserPekaPageFEState extends State<UserPekaPageFE> {
       ),
     );
   }
-
 }

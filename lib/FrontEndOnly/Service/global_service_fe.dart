@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:fluttersip/FrontEndOnly/AdminView/admin_home_page_fe.dart';
 import 'package:fluttersip/FrontEndOnly/AdminView/admin_peka_page_fe.dart';
@@ -78,6 +80,15 @@ class GlobalStateFE with ChangeNotifier {
   // Getter for userId
   String? get userId => _userId;
 
+  File? _uploadedImage;
+
+  File? get uploadedImage => _uploadedImage;
+
+  void updateUploadedImage(File? image) {
+    _uploadedImage = image;
+    notifyListeners();
+  }
+
   // Method to load userId from GetStorage
   void updateUserId(String? value) {
     _userId = value;  // 'userID' should match the key used when storing the ID
@@ -152,14 +163,11 @@ class GlobalStateFE with ChangeNotifier {
   }
 
   void resetForm() {
-    namaPegawai = '';
-    emailPekerja = '';
-    namaFungsi = '';
     lokasiSpesifik = '';
     deskripsiObservasi = '';
     directAction = '';
     saranAplikasi = '';
-    selectedKategori = '';
+    selectedKategori = null;
     selectedTanggal = DateTime.now();
     _selectedLokasiId = null;
     _selectedTipeObservasiId = null;
