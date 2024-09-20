@@ -1,6 +1,5 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
-import 'package:fluttersip/FrontEndOnly/Service/global_service_fe.dart';
 import 'package:fluttersip/FrontEndOnly/login_page_fe.dart';
 import 'package:fluttersip/FrontEndOnly/Service/main_page_fe.dart';
 import 'package:fluttersip/constants/constants.dart';
@@ -46,9 +45,6 @@ class AuthenticationController extends GetxController{
         var roleId = json.decode(response.body)['user']['role_id'];
         var fungsiId = json.decode(response.body)['user']['fungsi_id'];
 
-
-        // Update userId in GlobalStateFE
-        GlobalStateFE().updateUserId(userID.value);
 
         box.write('token', token.value);
         box.write('userName', userName.value);

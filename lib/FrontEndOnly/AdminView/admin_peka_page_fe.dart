@@ -3,6 +3,7 @@ import 'package:fluttersip/FrontEndOnly/AdminView/tidak_lanjut_fe.dart';
 import 'package:fluttersip/FrontEndOnly/Service/global_service_fe.dart';
 import 'package:fluttersip/constants/constants.dart';
 import 'package:get_storage/get_storage.dart';
+import 'package:intl/intl.dart';
 import 'dart:convert';
 import 'package:provider/provider.dart';
 import 'package:http/http.dart' as http;
@@ -49,11 +50,14 @@ class _AdminPekaPageFEState extends State<AdminPekaPageFE> {
       if (response.statusCode == 202) {
         final List<dynamic> data = json.decode(response.body);
 
+        DateFormat dateFormat = DateFormat('yyyy/MM/dd');
+
         // Map the data and include only 'deskripsi' and 'tanggal'
         List<Map<String, dynamic>> tindaklanjuts = data.map((item) {
           return {
             'deskripsi': item['deskripsi'],
-            'tanggal': DateTime.parse(item['tanggal']),
+            'created_at': DateTime.parse(item['created_at']),
+            'tanggal': dateFormat.format(DateTime.parse(item['tanggal'])),
             'status': item['status'],
             'tipe': item['tipe'],
             'img': item['img'], // If you want to include an image
@@ -61,7 +65,7 @@ class _AdminPekaPageFEState extends State<AdminPekaPageFE> {
         }).toList();
 
         // Sort by 'tanggal' (newest first)
-        tindaklanjuts.sort((a, b) => b['tanggal'].compareTo(a['tanggal']));
+        tindaklanjuts.sort((a, b) => b['created_at'].compareTo(a['created_at']));
 
         return tindaklanjuts;
       } else {
@@ -143,7 +147,7 @@ class _AdminPekaPageFEState extends State<AdminPekaPageFE> {
                           ),
                           const SizedBox(width: 4),
                           Text(
-                            tindaklanjut['tanggal'].toString(),
+                            tindaklanjut['created_at'].toString(),
                             style: TextStyle(
                               fontSize: 16,
                               color: Colors.grey[700],

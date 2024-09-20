@@ -79,7 +79,11 @@ class GlobalStateFE with ChangeNotifier {
 
   // Getter for userId
   String? get userId => _userId;
-
+// Method to load userId from GetStorage
+  void updateUserId(String? value) {
+    _userId = value;  // 'userID' should match the key used when storing the ID
+    notifyListeners();  // Notify UI that userID has been updated
+  }
   File? _uploadedImage;
 
   File? get uploadedImage => _uploadedImage;
@@ -89,11 +93,7 @@ class GlobalStateFE with ChangeNotifier {
     notifyListeners();
   }
 
-  // Method to load userId from GetStorage
-  void updateUserId(String? value) {
-    _userId = value;  // 'userID' should match the key used when storing the ID
-    notifyListeners();  // Notify UI that userID has been updated
-  }
+
 
 
   void updateClsr(String? id) {

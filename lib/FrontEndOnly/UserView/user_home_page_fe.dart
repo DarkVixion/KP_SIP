@@ -1,8 +1,10 @@
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
+
 import 'package:fluttersip/FrontEndOnly/Service/global_service_fe.dart';
 import 'package:fluttersip/FrontEndOnly/profile_page_fe.dart';
 import 'package:fluttersip/constants/constants.dart';
+import 'package:fluttersip/testcode.dart';
 
 
 import 'package:get_storage/get_storage.dart';
@@ -54,6 +56,9 @@ class _UserHomePageFEState extends State<UserHomePageFE> {
   @override
   Widget build(BuildContext context) {
     final globalState = Provider.of<GlobalStateFE>(context);
+    var userID = box.read('userID');
+    globalState.updateUserId(userID);
+
     var userName = box.read('userName');
     var userRole = box.read('userRole');
     return Scaffold(
@@ -61,7 +66,12 @@ class _UserHomePageFEState extends State<UserHomePageFE> {
         actions: [
           IconButton(
             icon: const Icon(Icons.notifications),
-            onPressed: () {},
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => LaporanListPage()),
+              );
+            },
           ),
         ],
         leading: Builder(
