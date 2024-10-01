@@ -90,7 +90,7 @@ class _UserFormPage1FEState extends State<UserFormPage1FE> {
     final globalState = Provider.of<GlobalStateFE>(context, listen: false);
 
     setState(() {
-      _tipeObservasiError = globalState.selectedTipeObservasiId == null;
+      _tipeObservasiError = globalState.selectedTipeObservasiId == '';
       _kategoriError = globalState.selectedKategori == null;
       _subKategoriError = globalState.selectedSubKategoriId == null;
     });

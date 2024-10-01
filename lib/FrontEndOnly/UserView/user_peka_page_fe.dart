@@ -8,14 +8,15 @@ import 'package:get_storage/get_storage.dart';
 import 'package:provider/provider.dart';
 
 class UserPekaPageFE extends StatefulWidget {
-  const UserPekaPageFE({super.key});
+  final String? statusFilter; // Optional filter for status
+  const UserPekaPageFE({super.key, this.statusFilter});
 
   @override
   State<UserPekaPageFE> createState() => _UserPekaPageFEState();
 }
 
 class _UserPekaPageFEState extends State<UserPekaPageFE> {
-  late Future<List<Map<String, dynamic>>> _fetchObservations;
+  late Future<List<Map<String, dynamic>>> _fetchObservations = Future.value([]);
   final box = GetStorage();
   final Dio dio = Dio(); // Dio instance
 
@@ -23,7 +24,9 @@ class _UserPekaPageFEState extends State<UserPekaPageFE> {
   void initState() {
     super.initState();
     _fetchObservations = _fetchData(); // Initialize the Future
+    setState(() {});  // Trigger UI update
   }
+
 
   Future<Uint8List?> _fetchImageWithTimeout(String imageUrl) async {
     try {

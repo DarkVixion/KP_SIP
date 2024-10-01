@@ -1,10 +1,12 @@
 
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
+import 'package:fluttersip/FrontEndOnly/AdminView/admin_peka_page_fe.dart';
 
 import 'package:fluttersip/FrontEndOnly/Service/global_service_fe.dart';
 import 'package:fluttersip/FrontEndOnly/profile_page_fe.dart';
 import 'package:fluttersip/constants/constants.dart';
+import 'package:get/get.dart';
 
 import 'package:get_storage/get_storage.dart';
 import 'package:path_provider/path_provider.dart';
@@ -24,44 +26,39 @@ class _AdminHomePageFEState extends State<AdminHomePageFE> {
   @override
   void initState() {
     super.initState();
-    fetchPekaCount();
-    fetchOpenCount();
+
+    fetchStatusCounts();
   }
+
 
   int totalPekaCount = 0;
-  Future<void> fetchPekaCount() async {
-    Dio dio = Dio();
-    try {
-      final response = await dio.get('${url}laporans');
-      if (response.statusCode == 202) {
-        List laporans = response.data;  // Assuming the API returns a list of laporans
-        setState(() {
-          totalPekaCount = laporans.length;  // Count the number of laporans
-        });
-      }
-    } catch (e) {
-      print("Error fetching PEKA count: $e");
-    }
-  }
-
   int totalOpenCount = 0;
+  int totalClosedCount = 0;
+  int totalOnProcessCount = 0;
+  int totalRejectedCount = 0;
+  int totalOverdueCount = 0;
 
-  Future<void> fetchOpenCount() async {
+  Future<void> fetchStatusCounts() async {
     Dio dio = Dio();
     try {
       final response = await dio.get('${url}tindaklanjuts');
       if (response.statusCode == 202) {
-        List tindaklanjuts = response.data;  // Assuming the API returns a list of laporans
+        List tindaklanjuts = response.data;
+
+        // Filter the data based on status and count
         setState(() {
-          totalOpenCount = tindaklanjuts.length;  // Count the number of laporans
+          totalPekaCount = tindaklanjuts.length;
+          totalOpenCount = tindaklanjuts.where((tindaklanjut) => tindaklanjut['status'] == 'Open').length;
+          totalClosedCount = tindaklanjuts.where((tindaklanjut) => tindaklanjut['status'] == 'Closed').length;
+          totalOnProcessCount = tindaklanjuts.where((tindaklanjut) => tindaklanjut['status'] == 'OnProcess').length;
+          totalRejectedCount = tindaklanjuts.where((tindaklanjut) => tindaklanjut['status'] == 'Rejected').length;
+          totalOverdueCount = tindaklanjuts.where((tindaklanjut) => tindaklanjut['status'] == 'Overdue').length;
         });
       }
     } catch (e) {
       print("Error fetching Tindak Lanjut count: $e");
     }
   }
-
-
 
 
   bool isDownloading = false;
@@ -220,6 +217,9 @@ class _AdminHomePageFEState extends State<AdminHomePageFE> {
                               icon: const Icon(Icons.layers,
                                 color: Color.fromARGB(255, 103, 80, 164),),
                               count: totalPekaCount,
+                              onTap: () {
+                                Get.offAll(const TindakLanjutPageFE());
+                              },
                             ),
                           ),
                           const SizedBox(width: 16),
@@ -229,50 +229,62 @@ class _AdminHomePageFEState extends State<AdminHomePageFE> {
                               icon: const Icon(Icons.folder_open,
                                 color: Color.fromARGB(255, 210, 157, 172),),
                               count: totalOpenCount,
+                              onTap: (){
+                                Get.offAll(TindakLanjutPageFE(statusFilter: 'Open'));
+                              },
                             ),
                           ),
                         ],
                       ),
                       const SizedBox(height: 16),
-                      const Row(
+                       Row(
                         children: [
                           Expanded(
                             child: _PekaCard(
                               title: 'Close',
-                              icon: Icon(Icons.checklist,
+                              icon: const Icon(Icons.checklist,
                                   color: Color.fromARGB(221, 50, 205, 50)),
-                              count: 0,
+                              count: totalClosedCount,
+                              onTap: () {
+                                Get.offAll(TindakLanjutPageFE(statusFilter: 'Closed'));
+                              },
                             ),
                           ),
-                          SizedBox(width: 16),
-                          Expanded(
+                          const SizedBox(width: 16),
+                           Expanded(
                             child: _PekaCard(
                               title: 'On Progress',
-                              icon: Icon(Icons.access_time,
+                              icon: const Icon(Icons.access_time,
                                   color: Color.fromARGB(255, 192, 15, 12)),
-                              count: 0,
+                              count: totalOnProcessCount, onTap: () {
+                              Get.offAll(TindakLanjutPageFE(statusFilter: 'OnProcess'));
+                            },
                             ),
                           ),
                         ],
                       ),
                       const SizedBox(height: 16),
-                       const Row(
+                       Row(
                         children: [
                           Expanded(
                             child: _PekaCard(
                               title: 'Rejected',
-                              icon: Icon(Icons.cancel,
+                              icon: const Icon(Icons.cancel,
                                   color: Color.fromARGB(255, 255, 137, 129)),
-                              count: 0,
+                              count: totalRejectedCount, onTap: () {
+                              Get.offAll(TindakLanjutPageFE(statusFilter: 'Rejected'));
+                            },
                             ),
                           ),
-                          SizedBox(width: 16),
+                          const SizedBox(width: 16),
                           Expanded(
                             child: _PekaCard(
                               title: 'Overdue',
-                              icon: Icon(Icons.calendar_today,
+                              icon: const Icon(Icons.calendar_today,
                                   color: Color.fromARGB(255, 117, 117, 117)),
-                              count: 0,
+                              count: totalOverdueCount, onTap: () {
+                              Get.offAll(TindakLanjutPageFE(statusFilter: 'Overdue'));
+                            },
                             ),
                           ),
                         ],
@@ -400,39 +412,43 @@ class _PekaCard extends StatelessWidget {
   final String title;
   final Icon icon;
   final int count;
+  final VoidCallback onTap;
 
-  const _PekaCard({required this.title, required this.icon, required this.count});
+  const _PekaCard({required this.title, required this.icon, required this.count, required this.onTap,});
 
   @override
   Widget build(BuildContext context) {
-    return Card(
-      child: Container(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              title,
-              style: const TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            const SizedBox(height: 8),
-            Row(
-              children: [
-                icon,
-                const SizedBox(width: 16),
-                Text(
-                  '$count',
-                  style: const TextStyle(
-                    fontSize: 24,
-                    fontWeight: FontWeight.bold,
-                  ),
+    return GestureDetector(
+      onTap: onTap,
+      child: Card(
+        child: Container(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                title,
+                style: const TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
                 ),
-              ],
-            ),
-          ],
+              ),
+              const SizedBox(height: 8),
+              Row(
+                children: [
+                  icon,
+                  const SizedBox(width: 16),
+                  Text(
+                    '$count',
+                    style: const TextStyle(
+                      fontSize: 24,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
         ),
       ),
     );

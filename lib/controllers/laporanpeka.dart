@@ -66,7 +66,7 @@ class LaporanPekaController extends GetxController {
         GlobalStateFE().resetForm();
         var userRole = box.read('userRole');
         if (userRole == 'Admin') {
-          Get.offAll(() => const AdminPekaPageFE());
+          Get.offAll(() => const TindakLanjutPageFE());
         } else {
           Get.offAll(() => const UserPekaPageFE());
         }

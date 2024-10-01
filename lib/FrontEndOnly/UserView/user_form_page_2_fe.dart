@@ -55,7 +55,7 @@ class _UserFormPage2FEState extends State<UserFormPage2FE> {
     final globalState = Provider.of<GlobalStateFE>(context, listen: false);
     setState(() {
       // Validate each field
-      _tipeCLSRError = globalState.selectedClsrId == null;
+      _tipeCLSRError = globalState.selectedClsrId == '';
 
     });
 

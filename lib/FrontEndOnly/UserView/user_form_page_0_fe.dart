@@ -43,49 +43,52 @@ class _UserFormPage0FEState extends State<UserFormPage0FE> {
   @override
   void initState() {
     super.initState();
-    var userName = box.read('userName');
-    var userEmail = box.read('userEmail');
-    var userFungsiD = box.read('userFungsiD');
 
-    _namaPegawaiController.text = userName;
-    _emailPekerjaController.text = userEmail;
-    _namaFungsiController.text = userFungsiD;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      // Fetch values from GetStorage
+      var userName = box.read('userName');
+      var userEmail = box.read('userEmail');
+      var userFungsiD = box.read('userFungsiD');
 
-    // Update the GlobalStateFE with the initial values
-    Provider.of<GlobalStateFE>(context, listen: false).updateNamaPegawai(userName);
-    Provider.of<GlobalStateFE>(context, listen: false).updateEmailPekerja(userEmail);
-    Provider.of<GlobalStateFE>(context, listen: false).updateNamaFungsi(userFungsiD);
+      // Update the controllers without calling setState()
+      _namaPegawaiController.text = userName;
+      _emailPekerjaController.text = userEmail;
+      _namaFungsiController.text = userFungsiD;
 
-    _namaPegawaiController.addListener(() {
-      Provider.of<GlobalStateFE>(context, listen: false)
-          .updateNamaPegawai(_namaPegawaiController.text);
-    });
-    _emailPekerjaController.addListener(() {
-      Provider.of<GlobalStateFE>(context, listen: false)
-          .updateEmailPekerja(_emailPekerjaController.text);
-    });
-    _namaFungsiController.addListener(() {
-      Provider.of<GlobalStateFE>(context, listen: false)
-          .updateNamaFungsi(_namaFungsiController.text);
-    });
+      // Update the GlobalStateFE with the initial values without setState()
+      final globalState = Provider.of<GlobalStateFE>(context, listen: false);
+      globalState.updateNamaPegawai(userName);
+      globalState.updateEmailPekerja(userEmail);
+      globalState.updateNamaFungsi(userFungsiD);
 
-    _lokasiSpesifikController.addListener(() {
-      Provider.of<GlobalStateFE>(context, listen: false)
-          .updateLokasiSpesifik(_lokasiSpesifikController.text);
-    });
-    fetchLokasi().then((data) {
-      setState(() {
-        lokasiOptions = data;
+      // Set the default date to today if no date has been selected
+      if (globalState.selectedTanggal == null) {
+        globalState.selectedTanggal = DateTime.now();
+      }
+
+      // Fetch Lokasi without calling setState in the callback
+      fetchLokasi().then((data) {
+        setState(() {
+          lokasiOptions = data;
+        });
+      });
+
+      // Add listeners to update the global state when text fields change
+      _namaPegawaiController.addListener(() {
+        globalState.updateNamaPegawai(_namaPegawaiController.text);
+      });
+      _emailPekerjaController.addListener(() {
+        globalState.updateEmailPekerja(_emailPekerjaController.text);
+      });
+      _namaFungsiController.addListener(() {
+        globalState.updateNamaFungsi(_namaFungsiController.text);
+      });
+      _lokasiSpesifikController.addListener(() {
+        globalState.updateLokasiSpesifik(_lokasiSpesifikController.text);
       });
     });
-
-    // Set the default date to today if no date has been selected
-    final globalState = Provider.of<GlobalStateFE>(context, listen: false);
-    // ignore: prefer_conditional_assignment
-    if (globalState.selectedTanggal == null) {
-      globalState.selectedTanggal = DateTime.now();
-    }
   }
+
 
   bool _namaPegawaiError = false;
   bool _emailPekerjaError = false;
@@ -114,16 +117,19 @@ class _UserFormPage0FEState extends State<UserFormPage0FE> {
     final globalState = Provider.of<GlobalStateFE>(context, listen: false);
     setState(() {
       // Validate each field
-      _namaPegawaiError = globalState.namaPegawai == null;
-      _emailPekerjaError = globalState.emailPekerja == null;
-      _namaFungsiError = globalState.namaFungsi == null;
-      _lokasiSpesifikError = globalState.lokasiSpesifik == null;
-      _lokasiObservasiError = globalState.selectedLokasiId == null;
+      _namaPegawaiError =  globalState.namaPegawai.isEmpty;
+      _emailPekerjaError =  globalState.emailPekerja.isEmpty;
+      _namaFungsiError =  globalState.namaFungsi.isEmpty;
+      _lokasiSpesifikError =  globalState.lokasiSpesifik.isEmpty;
+      _lokasiObservasiError =  globalState.selectedLokasiId == '';
       _tanggalObservasiError = globalState.selectedTanggal == null;
     });
 
     // If all fields are valid, proceed to the next page
-    if (!_lokasiSpesifikError &&
+    if (!_namaPegawaiError &&
+        !_emailPekerjaError &&
+        !_namaFungsiError &&
+        !_lokasiSpesifikError &&
         !_lokasiObservasiError &&
         !_tanggalObservasiError) {
       Navigator.push(
@@ -132,6 +138,7 @@ class _UserFormPage0FEState extends State<UserFormPage0FE> {
       );
     }
   }
+
   final box = GetStorage();
 
   @override

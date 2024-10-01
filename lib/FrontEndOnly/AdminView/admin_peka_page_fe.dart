@@ -8,42 +8,39 @@ import 'dart:convert';
 import 'package:provider/provider.dart';
 import 'package:http/http.dart' as http;
 
-class AdminPekaPageFE extends StatefulWidget {
-  const AdminPekaPageFE({super.key});
+class TindakLanjutPageFE extends StatefulWidget {
+  final String? statusFilter; // Optional filter for status
+
+  const TindakLanjutPageFE({super.key, this.statusFilter}); // Accept the filter in the constructor
 
   @override
-  State<AdminPekaPageFE> createState() => _AdminPekaPageFEState();
+  State<TindakLanjutPageFE> createState() => _TindakLanjutPageFEState();
 }
 
-class _AdminPekaPageFEState extends State<AdminPekaPageFE> {
-  late Future<List<Map<String, dynamic>>> _fetchObservations = Future.value([]); // Initialize with an empty Future
+class _TindakLanjutPageFEState extends State<TindakLanjutPageFE> {
+  late Future<List<Map<String, dynamic>>> _fetchObservations = Future.value([]);
   final box = GetStorage();
 
   @override
   void initState() {
     super.initState();
-    _initializeData();  // Fetch data during initialization
+    _initializeData();
   }
 
   Future<void> _initializeData() async {
-    // Step 1: Fetch and store TipeObservasi first
-
-    // Step 2: Fetch observations after TipeObservasi has been fetched
     _fetchObservations = _fetchData();  // Fetch observations
     setState(() {});  // Trigger UI update
   }
 
-
-
   Future<List<Map<String, dynamic>>> _fetchData() async {
-    final token = box.read('token');  // Assuming the token is needed for authorization
+    final token = box.read('token');
 
     try {
       var response = await http.get(
-        Uri.parse('${url}tindaklanjuts'),  // Assuming this is the correct endpoint for tindaklanjuts
+        Uri.parse('${url}tindaklanjuts'),
         headers: {
           'Accept': 'application/json',
-          'Authorization': 'Bearer $token',  // Include the token if necessary
+          'Authorization': 'Bearer $token',
         },
       );
 
@@ -52,19 +49,27 @@ class _AdminPekaPageFEState extends State<AdminPekaPageFE> {
 
         DateFormat dateFormat = DateFormat('yyyy/MM/dd');
 
-        // Map the data and include only 'deskripsi' and 'tanggal'
         List<Map<String, dynamic>> tindaklanjuts = data.map((item) {
           return {
+            'id': item['id'].toString(),
             'deskripsi': item['deskripsi'],
             'created_at': DateTime.parse(item['created_at']),
             'tanggal': dateFormat.format(DateTime.parse(item['tanggal'])),
             'status': item['status'],
-            'tipe': item['tipe'],
-            'img': item['img'], // If you want to include an image
+            'tipe': item['tipe'].toString(),
+            'img': item['img'],
+            'tanggal_akhir': item['tanggal_akhir'],
           };
         }).toList();
 
-        // Sort by 'tanggal' (newest first)
+        // If a status filter is provided, filter the tindaklanjuts
+        if (widget.statusFilter != null) {
+          tindaklanjuts = tindaklanjuts
+              .where((item) => item['status'] == widget.statusFilter)
+              .toList();
+        }
+
+        // Sort by 'created_at'
         tindaklanjuts.sort((a, b) => b['created_at'].compareTo(a['created_at']));
 
         return tindaklanjuts;
@@ -76,8 +81,6 @@ class _AdminPekaPageFEState extends State<AdminPekaPageFE> {
       throw Exception('Failed to load tindaklanjuts');
     }
   }
-
-
 
   @override
   Widget build(BuildContext context) {
@@ -113,7 +116,7 @@ class _AdminPekaPageFEState extends State<AdminPekaPageFE> {
               var tindaklanjut = tindaklanjuts[index];
 
               return InkWell(
-                onTap: (){
+                onTap: () {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
@@ -132,13 +135,25 @@ class _AdminPekaPageFEState extends State<AdminPekaPageFE> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(
-                        '${tindaklanjut['deskripsi']}',
-                        style: const TextStyle(fontSize: 16),
+                      Row(
+                        children: [
+                          Text(
+                            '${tindaklanjut['deskripsi']}',
+                            style: const TextStyle(fontSize: 16),
+                          ),
+                        ],
                       ),
                       const SizedBox(height: 8.0),
                       Row(
-                        mainAxisAlignment: MainAxisAlignment.end,
+                        children: [
+                          Text(
+                            'Tanggal Akhir Tindak Lanjut : ${tindaklanjut['tanggal_akhir'] ?? '-'}',
+                            style: const TextStyle(fontSize: 16),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 8.0),
+                      Row(
                         children: [
                           Icon(
                             Icons.calendar_today,
@@ -163,7 +178,6 @@ class _AdminPekaPageFEState extends State<AdminPekaPageFE> {
           );
         },
       ),
-
       bottomNavigationBar: BottomNavigationBar(
         items: const [
           BottomNavigationBarItem(
@@ -187,4 +201,3 @@ class _AdminPekaPageFEState extends State<AdminPekaPageFE> {
     );
   }
 }
-

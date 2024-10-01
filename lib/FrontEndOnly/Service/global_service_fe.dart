@@ -10,10 +10,6 @@ import 'package:fluttersip/FrontEndOnly/profile_page_fe.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
 
-
-
-
-
 class GlobalStateFE with ChangeNotifier {
   static final GlobalStateFE _instance = GlobalStateFE._internal();
 
@@ -42,7 +38,7 @@ class GlobalStateFE with ChangeNotifier {
       }
     } else if (index == 1) {
       if (userRole == 'Admin') {
-        Get.offAll(() => const AdminPekaPageFE());
+        Get.offAll(() => const TindakLanjutPageFE());
       } else {
         Get.offAll(() => const UserPekaPageFE());
       }
