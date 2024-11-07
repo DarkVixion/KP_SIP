@@ -20,7 +20,6 @@ class LaporanPekaController extends GetxController {
     required String lokasiSpesifik,
     required String deskripsiObservasi,
     required String directAction,
-    required String saranAplikasi,
     required String tanggal,
     required String userId,
     required String lokasiId,
@@ -28,6 +27,7 @@ class LaporanPekaController extends GetxController {
     required String kategoriId,
     required String clsrId,
     File? image,
+    String? nonClsr,
   }) async {
     try {
       dio.FormData formData = dio.FormData.fromMap({
@@ -43,7 +43,7 @@ class LaporanPekaController extends GetxController {
         'lokasi_spesifik': lokasiSpesifik,
         'deskripsi_observasi': deskripsiObservasi,
         'direct_action': directAction,
-        'saran_aplikasi': saranAplikasi,
+        'non_clsr': nonClsr,
         if (image != null)
           'img': await dio.MultipartFile.fromFile(image.path, filename: image.path.split('/').last),
       });
@@ -59,7 +59,6 @@ class LaporanPekaController extends GetxController {
       );
 
       if (response.statusCode == 201) {
-        print("Laporan created successfully: ${response.data}");
         String laporanId = response.data['laporan']['id'].toString();
         await _createTindakLanjut(laporanId);
 
@@ -80,16 +79,44 @@ class LaporanPekaController extends GetxController {
 
   Future<void> _createTindakLanjut(String laporanId) async {
     try {
+      final globalState = GlobalStateFE();
+      final image = globalState.image;
+
+      // Prepare form data, explicitly handling MultipartFile for the image
+      dio.FormData formData = dio.FormData();
+
+      formData.fields.addAll([
+        MapEntry('tanggal', globalState.selectedTanggal!.toIso8601String()),
+        MapEntry('tipe_observasi_id', globalState.selectedTipeObservasiId.toString()),
+        const MapEntry('status', 'Open'),
+        MapEntry('deskripsi', globalState.deskripsiObservasi.toString()),
+        MapEntry('laporan_id', laporanId),
+        MapEntry('lokasi_id', globalState.selectedLokasiId.toString()),
+        MapEntry('detail_lokasi', globalState.lokasiSpesifik.toString()),
+        MapEntry('kategori_id', globalState.selectedSubKategoriId.toString()),
+        MapEntry('clsr_id', globalState.selectedClsrId.toString()),
+        MapEntry('direct_action', globalState.directAction.toString()),
+      ]);
+
+      // Conditionally add non_clsr if necessary
+      if (globalState.selectedClsrId == '450') {
+        formData.fields.add(MapEntry('non_clsr', globalState.selectedNonClsr.toString()));
+      }
+
+      // Add the image file if available
+      if (image != null) {
+        formData.files.add(MapEntry(
+          'img',
+          await dio.MultipartFile.fromFile(
+            image.path,
+            filename: image.path.split('/').last,
+          ),
+        ));
+      }
+
       var response = await _dio.post(
         '${url}tindaklanjuts',
-        data: {
-          'laporan_id': laporanId,
-          'tanggal': GlobalStateFE().selectedTanggal!.toIso8601String(),
-          'tipe': GlobalStateFE().selectedTipeObservasiId.toString(),
-          'status': 'Open',
-          'deskripsi': GlobalStateFE().deskripsiObservasi.toString(),
-          'img': '', // If you want to include an image
-        },
+        data: formData,
       );
 
       if (response.statusCode == 201) {
@@ -101,4 +128,6 @@ class LaporanPekaController extends GetxController {
       print('Error in _createTindakLanjut: ${e.toString()}');
     }
   }
+
+
 }

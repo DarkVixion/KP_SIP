@@ -17,7 +17,11 @@ class UserFormPage2FE extends StatefulWidget {
 }
 
 class _UserFormPage2FEState extends State<UserFormPage2FE> {
+  List<Map<String, dynamic>> clsrOptions = [];
+  TextEditingController nonClsrController = TextEditingController();
 
+  bool _tipeCLSRError = false;
+  bool _showNonClsrInput = false;
 
   @override
   void initState() {
@@ -27,9 +31,13 @@ class _UserFormPage2FEState extends State<UserFormPage2FE> {
         clsrOptions = data;
       });
     });
+
+    nonClsrController.addListener(() {
+      Provider.of<GlobalStateFE>(context, listen: false)
+          .updateNonClsr(nonClsrController.text);
+    });
   }
 
-  List<Map<String, dynamic>> clsrOptions = [];
   Future<List<Map<String, dynamic>>> fetchClsr() async {
     final response = await http.get(Uri.parse('${url}CLSR'));
 
@@ -38,7 +46,7 @@ class _UserFormPage2FEState extends State<UserFormPage2FE> {
       List<Map<String, dynamic>> clsr = data.map((item) => {
         'id': item['id'].toString(),
         'nama': item['nama'],
-        'deskripsi':item['deskripsi'],
+        'deskripsi': item['deskripsi'],
       }).toList();
       return clsr;
     } else {
@@ -46,20 +54,12 @@ class _UserFormPage2FEState extends State<UserFormPage2FE> {
     }
   }
 
-
-  // Validation flags
-  bool _tipeCLSRError = false;
-
-
   void _validateAndProceed() {
     final globalState = Provider.of<GlobalStateFE>(context, listen: false);
     setState(() {
-      // Validate each field
       _tipeCLSRError = globalState.selectedClsrId == '';
-
     });
 
-    // If all fields are valid, proceed to the next page
     if (!_tipeCLSRError) {
       Navigator.push(
         context,
@@ -76,9 +76,7 @@ class _UserFormPage2FEState extends State<UserFormPage2FE> {
       appBar: AppBar(
         backgroundColor: Colors.blue[700],
         title: const Center(
-          child: Text(
-            'Standard CLSR',
-          ),
+          child: Text('Standard CLSR'),
         ),
         automaticallyImplyLeading: false,
       ),
@@ -103,7 +101,7 @@ class _UserFormPage2FEState extends State<UserFormPage2FE> {
                         fontWeight: FontWeight.bold,
                       ),
                     ),
-                    const SizedBox(height: 16.0), // Space between title and options
+                    const SizedBox(height: 16.0),
                     Image.asset('images/CLSR.png'),
                   ],
                 ),
@@ -120,39 +118,72 @@ class _UserFormPage2FEState extends State<UserFormPage2FE> {
                   children: [
                     const Text.rich(
                       TextSpan(
-                          text: 'Pilih CLSR',
-                          style: TextStyle(
-                              color: Colors.black,
-                              fontSize: 18,
-                              fontWeight: FontWeight.bold
-                          ),children: <TextSpan>[
-                        TextSpan(
-                          text: ' *',
-                          style: TextStyle(color: Colors.red, fontSize: 18),
+                        text: 'Pilih CLSR',
+                        style: TextStyle(
+                          color: Colors.black,
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
                         ),
-                      ]
+                        children: <TextSpan>[
+                          TextSpan(
+                            text: ' *',
+                            style: TextStyle(color: Colors.red, fontSize: 18),
+                          ),
+                        ],
                       ),
                     ),
                     const Text(
                       'Pilihlah Kategori CLSR yang paling mewakili temuan Anda.'
                           '\n\nJika temuan anda tidak termasuk ke dalam kategori CLSR, silahkan pilih “Kategori Non-CLSR”.',
-                      style: TextStyle(
-                        fontSize: 12,
-                      ),
+                      style: TextStyle(fontSize: 12),
                     ),
-                    const SizedBox(height: 16.0), // Space between title and options
-                    // Generate RadioListTile widgets dynamically from options1 array
-                    ...clsrOptions.map((option) => RadioListTile(
-                      title: Text('${option['nama'] ?? 'Unknown'} - ${option['deskripsi'] ?? ''}'),
-                      value: option['id'],
-                      groupValue: globalState.selectedClsrId,
-                      onChanged: (value) {
-                        setState(() {
-                          globalState.updateClsr(value!);
-                          _tipeCLSRError = false;
-                        });
-                      },
-                    )),
+                    const SizedBox(height: 16.0),
+                    ...clsrOptions.map((option) {
+                      return Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          if (option['deskripsi'] == 'NON-CLSR')
+                            Row(
+                              children: [
+                                Radio<String>(
+                                  value: option['id'],
+                                  groupValue: globalState.selectedClsrId,
+                                  onChanged: (value) {
+                                    setState(() {
+                                      globalState.updateClsr(value!);
+                                      _tipeCLSRError = false;
+                                    });
+                                  },
+                                ),
+                                const SizedBox(width: 10),
+                                // Always visible input field for Non-CLSR
+                                Expanded(
+                                  child: TextFormField(
+                                    controller: nonClsrController,
+                                    decoration: const InputDecoration(
+                                      hintText: 'Input untuk Non-CLSR',
+                                      border: InputBorder.none,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            )
+                          else
+                            RadioListTile<String>(
+                              title: Text(
+                                  '${option['nama'] ?? 'Unknown'} - ${option['deskripsi'] ?? ''}'),
+                              value: option['id'],
+                              groupValue: globalState.selectedClsrId,
+                              onChanged: (value) {
+                                setState(() {
+                                  globalState.updateClsr(value!);
+                                  _tipeCLSRError = false;
+                                });
+                              },
+                            ),
+                        ],
+                      );
+                    }),
                     if (_tipeCLSRError)
                       Padding(
                         padding: const EdgeInsets.only(top: 8.0),
@@ -165,44 +196,35 @@ class _UserFormPage2FEState extends State<UserFormPage2FE> {
                 ),
               ),
               const SizedBox(height: 20),
-          Row(
-          mainAxisAlignment: MainAxisAlignment.end,
-          children: [
-            Column(
-              children: [
-                ElevatedButton(
-                  onPressed: (){
-                    Navigator.pop(context);
-                  },
-                  child: const Text(
-                    'Back',
-                    style: TextStyle(
-                        fontSize: 16
+              Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  ElevatedButton(
+                    onPressed: () {
+                      Navigator.pop(context);
+                    },
+                    child: const Text(
+                      'Back',
+                      style: TextStyle(fontSize: 16),
                     ),
                   ),
-                ),
-              ],
-            ),
-            Column(
-              children: [
-                ElevatedButton(
-                  onPressed: _validateAndProceed,
-                  child: const Text(
-                    'Next',
-                    style: TextStyle(
-                        fontSize: 16
+                  const SizedBox(width: 10),
+                  ElevatedButton(
+                    onPressed: _validateAndProceed,
+                    child: const Text(
+                      'Next',
+                      style: TextStyle(fontSize: 16),
                     ),
                   ),
-                ),
-              ],
-            ),
-
-          ],
-        ),
+                ],
+              ),
             ],
           ),
         ),
       ),
     );
   }
+
+
 }
+

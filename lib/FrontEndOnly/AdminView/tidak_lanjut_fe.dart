@@ -18,7 +18,15 @@ class TindaklanjutDetailPage extends StatefulWidget {
 class _TindaklanjutDetailPageState extends State<TindaklanjutDetailPage> {
   late String status;
   String? tipeNama;
+  String? lokasiNama;
+  String? clsrNama;
+  String? clsrDeskripsi;
+  String? kategoriNama;
+  String? clsrId;
+  String? kategoriId;
   String? tipeObservasiId;
+  String? lokasiId;
+  String? nonClsr;
 
   @override
   void initState() {
@@ -38,6 +46,12 @@ class _TindaklanjutDetailPageState extends State<TindaklanjutDetailPage> {
     status = widget.tindaklanjut['status'];
     tipeObservasiId =widget.tindaklanjut['tipe'];
     fetchTipeObservasiNama();
+    lokasiId = widget.tindaklanjut['lokasi'];
+    fetchLokasiNama();
+    clsrId = widget.tindaklanjut['clsr'];
+    fetchClsrNama();
+    kategoriId = widget.tindaklanjut['kategori'];
+    fetchKategoriNama();
 
   }
 
@@ -50,7 +64,7 @@ class _TindaklanjutDetailPageState extends State<TindaklanjutDetailPage> {
 
     try {
       final response = await dio.get(
-        '${url}TipeObservasi/$tipeObservasiId',
+        '${url}TipeObservasiT/$tipeObservasiId',
         options: Options(
           headers: {
             'Accept': 'application/json',
@@ -58,7 +72,7 @@ class _TindaklanjutDetailPageState extends State<TindaklanjutDetailPage> {
           },
         ),);
 
-      if (response.statusCode == 203) {
+      if (response.statusCode == 200) {
         setState(() {
           tipeNama = response.data['nama']; // Assign the fetched nama
         });
@@ -69,8 +83,92 @@ class _TindaklanjutDetailPageState extends State<TindaklanjutDetailPage> {
       print('Error fetching tipe observasi: $e');
     }
   }
+  Future<void> fetchLokasiNama() async {
+    Dio dio = Dio();
+    final box = GetStorage();
+    var token = box.read('token');
 
-  Future<void> updateStatus(String id, String newStatus, DateTime? selectedDate) async {
+
+    try {
+      final response = await dio.get(
+        '${url}LokasiT/$lokasiId',
+        options: Options(
+          headers: {
+            'Accept': 'application/json',
+            'Authorization': 'Bearer $token', // Include the token
+          },
+        ),);
+
+      if (response.statusCode == 200) {
+        setState(() {
+          lokasiNama = response.data['nama']; // Assign the fetched nama
+        });
+      } else {
+        print('Failed to fetch Lokasi');
+      }
+    } catch (e) {
+      print('Error fetching Lokasi: $e');
+    }
+  }
+
+  Future<void> fetchClsrNama() async {
+    Dio dio = Dio();
+    final box = GetStorage();
+    var token = box.read('token');
+
+
+    try {
+      final response = await dio.get(
+        '${url}CLSRT/$clsrId',
+        options: Options(
+          headers: {
+            'Accept': 'application/json',
+            'Authorization': 'Bearer $token', // Include the token
+          },
+        ),);
+
+      if (response.statusCode == 200) {
+        setState(() {
+          clsrNama = response.data['nama']; // Assign the fetched nama
+          clsrDeskripsi = response.data['deskripsi'];
+        });
+      } else {
+        print('Failed to fetch CLSR');
+      }
+    } catch (e) {
+      print('Error fetching CLSR: $e');
+    }
+  }
+
+  Future<void> fetchKategoriNama() async {
+    Dio dio = Dio();
+    final box = GetStorage();
+    var token = box.read('token');
+
+
+    try {
+      final response = await dio.get(
+        '${url}KategoriT/$kategoriId',
+        options: Options(
+          headers: {
+            'Accept': 'application/json',
+            'Authorization': 'Bearer $token', // Include the token
+          },
+        ),);
+
+      if (response.statusCode == 200) {
+        setState(() {
+          kategoriNama = response.data['nama']; // Assign the fetched nama
+        });
+      } else {
+        print('Failed to fetch Lokasi');
+      }
+    } catch (e) {
+      print('Error fetching Lokasi: $e');
+    }
+  }
+
+  Future<void> updateStatus(String id, String newStatus, DateTime? selectedDate, String followUpDetails) async {
     Dio dio = Dio();
     final box = GetStorage();
     var token = box.read('token');
@@ -86,6 +184,7 @@ class _TindaklanjutDetailPageState extends State<TindaklanjutDetailPage> {
         data: {
           'status': newStatus,
           'tanggal_akhir': DateFormat('yyyy-MM-dd').format(selectedDate),
+          'follow_up': followUpDetails,  // Send the follow-up details here
         },
         options: Options(
           headers: {
@@ -108,10 +207,12 @@ class _TindaklanjutDetailPageState extends State<TindaklanjutDetailPage> {
 
   @override
   Widget build(BuildContext context) {
+    nonClsr = widget.tindaklanjut['non_clsr'];
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.blue[700],
         title: const Center(child: Text('Tindaklanjut Details')),
+        automaticallyImplyLeading: false,
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -125,7 +226,7 @@ class _TindaklanjutDetailPageState extends State<TindaklanjutDetailPage> {
                   borderRadius: BorderRadius.circular(0),
                 ),
                 child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     // Conditional image display
                     if (widget.tindaklanjut['img'] != null &&
@@ -142,7 +243,7 @@ class _TindaklanjutDetailPageState extends State<TindaklanjutDetailPage> {
                               'Accept': 'application/json',
                               'Connection' : 'keep-alive',
                             },
-                            '${url2}${widget.tindaklanjut['img']}',
+                            '$url2${widget.tindaklanjut['img']}',
                             height: 200, // You can adjust the size
                             fit: BoxFit.cover,
                           ),
@@ -150,7 +251,6 @@ class _TindaklanjutDetailPageState extends State<TindaklanjutDetailPage> {
                         ],
                       ),
                     Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         Text(
                           'Deskripsi: ${widget.tindaklanjut['deskripsi']}',
@@ -160,7 +260,6 @@ class _TindaklanjutDetailPageState extends State<TindaklanjutDetailPage> {
                     ),
                     const SizedBox(height: 13),
                     Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         const Text('Tanggal Akhir Tindak Lanjut '),
                         _buildDatePickerContainer(),
@@ -168,7 +267,6 @@ class _TindaklanjutDetailPageState extends State<TindaklanjutDetailPage> {
                     ),
                     const SizedBox(height: 13),
                     Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         Text(
                           'Tipe: ${tipeNama ?? 'Loading...'}',
@@ -178,36 +276,110 @@ class _TindaklanjutDetailPageState extends State<TindaklanjutDetailPage> {
                     ),
                     const SizedBox(height: 13),
                     Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Text(
-                          status == 'Overdue' ? 'Status: Overdue' : 'Status: $status',
-                          style: const TextStyle(fontSize: 16, color: Colors.red),  // Red text if overdue
+                        Flexible(
+                          child: Text(
+                            'Lokasi : ${lokasiNama ?? 'Loading...'}',
+                            style: const TextStyle(fontSize: 16),
+                            maxLines: 2, // Allows wrapping the text to two lines
+                            overflow: TextOverflow.visible,
+                          ),
                         ),
                       ],
                     ),
                     const SizedBox(height: 13),
                     Row(
+                      children: [
+                        Text(
+                          'Detail Lokasi : ${widget.tindaklanjut['detail_lokasi']}',
+                          style: const TextStyle(fontSize: 16),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 13),
+                    Row(
+                      children: [
+                        Flexible(
+                          child: Text(
+                            'Kategori : ${kategoriNama ?? 'Loading...'}',
+                            style: const TextStyle(fontSize: 16),
+                            maxLines: 2, // Allows wrapping the text to two lines
+                            overflow: TextOverflow.visible, // Shows overflowing text
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 13),
+                    if(widget.tindaklanjut['clsr'] == '450')...[
+                      Row(
+                        children: [
+                          Flexible(
+                            child: Text(
+                              'Non CLSR : ${nonClsr ?? 'No'} ',
+                              style: const TextStyle(fontSize: 16),
+                              maxLines: 2, // Allows wrapping the text to two lines
+                              overflow: TextOverflow.visible, // Shows overflowing text
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                    if (widget.tindaklanjut['clsr'] != '450')...[
+                      Row(
+                        children: [
+                          Flexible(
+                            child: Text(
+                              'CLSR : ${clsrNama ?? 'Loading...'} - $clsrDeskripsi',
+                              style: const TextStyle(fontSize: 16),
+                              maxLines: 2, // Allows wrapping the text to two lines
+                              overflow: TextOverflow.visible, // Shows overflowing text
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                    const SizedBox(height: 13),
+                    Row(
+                      children: [
+                        Flexible(
+                          child: Text(
+                            'Direct Action : ${widget.tindaklanjut['direct_action']}',
+                            style: const TextStyle(fontSize: 16),
+                            maxLines: 2, // Allows wrapping the text to two lines
+                            overflow: TextOverflow.visible,
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 13),
+                    Row(
+                      children: [
+                        Text(
+                          status == 'Overdue' ? 'Status: Overdue' : 'Status: $status',
+                          style: const TextStyle(fontSize: 16,),  // Red text if overdue
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 13),
+                    Row(
+                      children: [
+                        if (status != 'Open') ...[
+                          Flexible(
+                            child: Text(
+                              'Follow Up : ${widget.tindaklanjut['follow_up']}',
+                              style: const TextStyle(fontSize: 16),
+                              maxLines: 2, // Allows wrapping the text to two lines
+                              overflow: TextOverflow.visible,
+                            ),
+                          ),
+                        ],
+                      ],
+                    ),
+                    Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         // Show the Process and Reject buttons when status is 'Open'
                         if (status == 'Open') ...[
-                          ElevatedButton(
-                            onPressed: () {
-                              updateStatus(widget.tindaklanjut['id'], 'Rejected', selectedTanggal);
-                              Get.offAll(() => const TindakLanjutPageFE());
-                            },
-                            child: const Text('Reject'),
-                          ),
-                          const SizedBox(width: 13),
-                          ElevatedButton(
-                            onPressed: () {
-                              updateStatus(widget.tindaklanjut['id'], 'OnProcess', selectedTanggal);
-                              Get.offAll(() => const TindakLanjutPageFE());
-                            },
-                            child: const Text('Process'),
-                          ),
-                          const SizedBox(width: 13),
                           ElevatedButton(
                             onPressed: () {
                               Get.back();
@@ -217,23 +389,146 @@ class _TindaklanjutDetailPageState extends State<TindaklanjutDetailPage> {
                               style: TextStyle(fontSize: 16),
                             ),
                           ),
+                          const SizedBox(width: 13),
+                          ElevatedButton(
+                            onPressed: () {
+                              TextEditingController rejectReasonController = TextEditingController();
+
+                              showDialog(
+                                context: context,
+                                builder: (BuildContext context) {
+                                  return AlertDialog(
+                                    title: const Text('Konfirmasi Penolakan'),
+                                    content: Column(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        const Text('Masukan Alasan Penolakan PEKA :'),
+                                        const SizedBox(height: 10),
+                                        TextFormField(
+                                          controller: rejectReasonController,
+                                          decoration: const InputDecoration(
+                                            hintText: 'Alasan Penolakan',
+                                            border: OutlineInputBorder(),
+                                          ),
+                                          maxLines: 2,
+                                        ),
+                                      ],
+                                    ),
+                                    actions: [
+                                      TextButton(
+                                        onPressed: () {
+                                          Get.back();  // Close the dialog
+                                        },
+                                        child: const Text('Cancel'),
+                                      ),
+                                      TextButton(
+                                        onPressed: () {
+                                          // Call updateStatus with the rejection reason
+                                          updateStatus(
+                                            widget.tindaklanjut['id'],
+                                            'Rejected',
+                                            selectedTanggal,
+                                            rejectReasonController.text,  // Pass rejection reason to the API
+                                          );
+                                          // Close the dialog and navigate
+                                          Get.back();
+                                          Get.offAll(() => const TindakLanjutPageFE());
+                                        },
+                                        child: const Text('Confirm'),
+                                      ),
+                                    ],
+                                  );
+                                },
+                              );
+                            },
+                            child: const Text('Reject'),
+                          ),
+
+                          const SizedBox(width: 13),
+                          ElevatedButton(
+                            onPressed: () {
+                              TextEditingController followUpController = TextEditingController();
+
+                              showDialog(
+                                context: context,
+                                builder: (BuildContext context) {
+                                  return AlertDialog(
+                                    title: const Text('Konfirmasi Proses'),
+                                    content: Column(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        const Text('Masukan detail follow-Up untuk proses PEKA :'),
+                                        const SizedBox(height: 10),
+                                        TextFormField(
+                                          controller: followUpController,
+                                          decoration: const InputDecoration(
+                                            hintText: 'Detail Follow-Up',
+                                            border: OutlineInputBorder(),
+                                          ),
+                                          maxLines: 2,
+                                        ),
+                                      ],
+                                    ),
+                                    actions: [
+                                      TextButton(
+                                        onPressed: () {
+                                          Get.back();  // Close the dialog
+                                        },
+                                        child: const Text('Cancel'),
+                                      ),
+                                      TextButton(
+                                        onPressed: () {
+                                          // Get the follow-up details from the text field
+                                          String followUpDetails = followUpController.text;
+
+                                          // Call updateStatus with the follow-up details
+                                          updateStatus(
+                                            widget.tindaklanjut['id'],
+                                            'OnProcess',
+                                            selectedTanggal,
+                                            followUpDetails,  // Pass follow-up to the API
+                                          );
+
+                                          // Close the dialog and navigate
+                                          Get.back();
+                                          Get.offAll(() => const TindakLanjutPageFE());
+                                        },
+                                        child: const Text('Confirm'),
+                                      ),
+                                    ],
+                                  );
+                                },
+                              );
+                            },
+                            child: const Text('Process'),
+                          ),
+
+
                         ],
 
                         // Show the Finish and Back buttons when status is 'OnProcess'
                         if (status == 'OnProcess' || status == 'Overdue') ...[
                           ElevatedButton(
                             onPressed: () {
-                              updateStatus(widget.tindaklanjut['id'], 'Closed', selectedTanggal);
-                              Get.offAll(() => const TindakLanjutPageFE());
+                              Get.back();
                             },
-                            child: const Text('Finish'),
+                            child: const Text('Back'),
                           ),
                           const SizedBox(width: 13),
                           ElevatedButton(
                             onPressed: () {
-                              Get.back();
+                              // Simply update the status to 'Closed' without asking for follow-up
+                              updateStatus(
+                                  widget.tindaklanjut['id'],
+                                  'Closed',
+                                  selectedTanggal,
+                                  ''  // No follow-up details for Finish
+                              );
+
+                              // Navigate back to the TindakLanjutPageFE after finishing
+                              Get.offAll(() => const TindakLanjutPageFE());
                             },
-                            child: const Text('Back'),
+                            child: const Text('Finish'),
                           ),
                         ],
 

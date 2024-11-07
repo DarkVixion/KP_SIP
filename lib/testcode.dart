@@ -5,20 +5,18 @@ import 'package:fluttersip/FrontEndOnly/UserView/user_form_page_0_fe.dart';
 import 'package:fluttersip/FrontEndOnly/Service/global_service_fe.dart';
 import 'package:fluttersip/constants/constants.dart';
 import 'package:get_storage/get_storage.dart';
-import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 
-class UserPekaPageFE extends StatefulWidget {
+class UserHomePageTest extends StatefulWidget {
   final List<dynamic>? laporanIds;  // Optional list of laporan IDs for filtering
 
-  const UserPekaPageFE({super.key, this.laporanIds});
+  const UserHomePageTest({super.key, this.laporanIds});
 
   @override
-  State<UserPekaPageFE> createState() => _UserPekaPageFEState();
+  State<UserHomePageTest> createState() => _UserHomePageTestState();
 }
 
-
-class _UserPekaPageFEState extends State<UserPekaPageFE> {
+class _UserHomePageTestState extends State<UserHomePageTest> {
   late Future<List<Map<String, dynamic>>> _fetchObservations = Future.value([]);
   final box = GetStorage();
   final Dio dio = Dio(); // Dio instance
@@ -30,11 +28,8 @@ class _UserPekaPageFEState extends State<UserPekaPageFE> {
     setState(() {});  // Trigger UI update
   }
 
-
   Future<Uint8List?> _fetchImageWithTimeout(String imageUrl) async {
     try {
-      // print('Fetching image from URL: $imageUrl');  // Log the image URL
-
       final response = await dio.get(
         imageUrl,
         options: Options(
@@ -45,50 +40,13 @@ class _UserPekaPageFEState extends State<UserPekaPageFE> {
           receiveTimeout: const Duration(seconds: 10),
         ),
       );
-
-      // print('Response status code: ${response.statusCode}');  // Log status code
-
       if (response.statusCode == 200) {
         return Uint8List.fromList(response.data);  // Return image bytes if successful
-      } else {
-        // print('Failed to fetch image, status code: ${response.statusCode}');
       }
     } catch (e) {
-      print('Unknown error: $e');
+      print('Error fetching image: $e');
     }
     return null;
-  }
-
-
-  Future<void> fetchAllTipeObservasi(List<int> tipeObservasiIds) async {
-    final token = box.read('token');
-
-    // Fetch each TipeObservasi in parallel
-    await Future.wait(tipeObservasiIds.map((id) async {
-      try {
-        var response = await dio.get(
-          '${url}TipeObservasi/$id',
-          options: Options(
-            headers: {
-              'Accept': 'application/json',
-              'Authorization': 'Bearer $token', // Include the token
-            },
-          ),
-        );
-
-        if (response.statusCode == 203) {
-          var responseBody = response.data;
-          var tipeObservasiName = responseBody['nama'];
-          print('tipe observasi = $tipeObservasiName');
-          // Store the fetched TipeObservasi name in GetStorage using the ID as key
-          box.write('tipeObservasi_$id', tipeObservasiName);
-        } else {
-          print('Error fetching TipeObservasi $id: ${response.data}');
-        }
-      } catch (e) {
-        print('Exception fetching TipeObservasi $id: $e');
-      }
-    }));
   }
 
   Future<Map<int, Map<String, String>>> _fetchTindaklanjuts() async {
@@ -103,58 +61,71 @@ class _UserPekaPageFEState extends State<UserPekaPageFE> {
         ),
       );
 
-      if (response.statusCode == 202) {
+      if (response.statusCode == 202 || response.statusCode == 200) {
         final List<dynamic> tindakLanjuts = response.data;
 
-        // Map tindaklanjuts with laporan_id as the key and a map of 'status' and 'follow_up' as the value
+        // Debugging: Print fetched tindaklanjuts data
+        print("Fetched tindaklanjuts data: $tindakLanjuts");
+
+        // Map tindaklanjuts with laporan_id as the key and both status and follow_up as values
         return {
           for (var tindakLanjutan in tindakLanjuts)
             tindakLanjutan['laporan_id']: {
-              'status': tindakLanjutan['status'] ?? 'Unknown',
-              'follow_up': tindakLanjutan['follow_up'] ?? 'Unknown',
+              'status': tindakLanjutan['status'] ?? 'No status',
+              'follow_up': tindakLanjutan['follow_up'] ?? 'No follow-up'
             }
         };
       } else {
         throw Exception('Failed to fetch tindaklanjuts');
       }
     } catch (e) {
-      throw Exception('Exception fetching tindaklanjuts: $e');
+      print('Exception fetching tindaklanjuts: $e');
+      return {};
     }
   }
 
   Future<List<Map<String, dynamic>>> _fetchData() async {
+    final token = box.read('token');
     try {
-      final response = await dio.get('${url}laporans');
-      if (response.statusCode == 202) {
-        final List<dynamic> data = response.data;
-        var userId = box.read('userID');  // Get the logged-in user ID
+      final response = await dio.get(
+        '${url}laporans',
+        options: Options(
+          headers: {
+            'Authorization': 'Bearer $token',
+          },
+        ),
+      );
 
-        // Filter laporans for this user
+      if (response.statusCode == 202 || response.statusCode == 200) {
+        final List<dynamic> data = response.data;
+        final userId = box.read('userID');
+
+        print("Fetched laporans data: $data");
+
         List<dynamic> userLaporans = data.where((item) => item['user_id'].toString() == userId).toList();
 
-        // Fetch all tindaklanjuts and map them by laporan_id
         Map<int, Map<String, String>> tindakLanjutMap = await _fetchTindaklanjuts();
 
-        // Sort by 'created_at' in descending order
         userLaporans.sort((a, b) => DateTime.parse(b['created_at']).compareTo(DateTime.parse(a['created_at'])));
 
-        // Apply filter by laporanIds if provided
-        if (widget.laporanIds != null ) {
+        if (widget.laporanIds != null) {
           userLaporans = userLaporans.where((item) => widget.laporanIds!.contains(item['id'])).toList();
         }
 
-        // Map user laporans and fetch status for each
         return userLaporans.map((item) {
           final tipeObservasiName = box.read('tipeObservasi_${item['tipe_observasi_id']}') ?? 'Unknown';
           final laporanId = item['id'];
           final tindakLanjutData = tindakLanjutMap[laporanId];
+
+          // Retrieve both status and follow_up from tindakLanjutMap
           final status = tindakLanjutData?['status'] ?? 'Unknown';
           final followUp = tindakLanjutData?['follow_up'] ?? 'Unknown';
 
-          DateFormat dateFormat = DateFormat('yyyy/MM/dd HH:mm:ss');
+          // Debugging: Print each mapped data for verification
+          print("Laporan ID: $laporanId, Status: $status, Follow Up: $followUp");
 
           return {
-            'timestamp': dateFormat.format(DateTime.parse(item['created_at'])),
+            'timestamp': DateTime.parse(item['created_at']),
             'answers': [
               {'answer': tipeObservasiName}
             ],
@@ -164,10 +135,12 @@ class _UserPekaPageFEState extends State<UserPekaPageFE> {
           };
         }).toList();
       } else {
-        throw Exception('Failed to load data');
+        print('Failed to load laporans: ${response.statusCode}');
+        return [];
       }
     } catch (e) {
-      throw Exception('Failed to load data: $e');
+      print('Exception loading laporans: $e');
+      return [];
     }
   }
 
@@ -205,7 +178,7 @@ class _UserPekaPageFEState extends State<UserPekaPageFE> {
             itemBuilder: (context, index) {
               var doc = documents[index];
               var answers = List<Map<String, dynamic>>.from(doc['answers']);
-              var status = doc['status'];  // Fetch the status from the document
+              var status = doc['status'];
               var followUp = doc['follow_up'];
 
               return Container(
@@ -233,17 +206,15 @@ class _UserPekaPageFEState extends State<UserPekaPageFE> {
                                   future: _fetchImageWithTimeout('$url2${doc['img']}'),
                                   builder: (context, snapshot) {
                                     if (snapshot.connectionState == ConnectionState.waiting) {
-                                      return const CircularProgressIndicator(); // Show loading indicator while fetching
+                                      return const CircularProgressIndicator();
                                     }
 
                                     if (snapshot.hasError || !snapshot.hasData) {
-                                      // Fallback image if there's an error or the image is null/empty
                                       return Image.network(
                                         'https://via.assets.so/img.jpg?w=50&h=50&tc=Black&bg=white&t=Tidak Ada Gambar',
                                         height: 100,
                                         width: 100,
                                         fit: BoxFit.cover,
-
                                       );
                                     }
 
@@ -259,10 +230,10 @@ class _UserPekaPageFEState extends State<UserPekaPageFE> {
                                   'https://via.assets.so/img.jpg?w=50&h=50&tc=Black&bg=white&t=Tidak Ada Gambar',
                                   height: 100,
                                   width: 100,
-                                  fit: BoxFit.cover, // Fallback image if img is null
+                                  fit: BoxFit.cover,
                                 ),
                               ),
-                              const SizedBox(width: 8.0), // Space between image and text
+                              const SizedBox(width: 8.0),
                               Expanded(
                                 child: Text(
                                   '${answer['answer']}',
@@ -275,8 +246,6 @@ class _UserPekaPageFEState extends State<UserPekaPageFE> {
                       }).toList(),
                     ),
                     const SizedBox(height: 8.0),
-
-                    // Display the fetched status
                     Row(
                       children: [
                         const Text(
@@ -285,7 +254,7 @@ class _UserPekaPageFEState extends State<UserPekaPageFE> {
                         ),
                         const SizedBox(width: 8),
                         Text(
-                          status ?? 'Unknown',
+                          status,
                           style: const TextStyle(fontSize: 16, color: Colors.green),
                         ),
                       ],
@@ -299,19 +268,18 @@ class _UserPekaPageFEState extends State<UserPekaPageFE> {
                         ),
                         const SizedBox(width: 8),
                         Text(
-                          followUp ?? 'Unknown',
+                          followUp,
                           style: const TextStyle(fontSize: 16, color: Colors.green),
                         ),
                       ],
                     ),
-                    // Display timestamp
                     Row(
                       mainAxisAlignment: MainAxisAlignment.end,
                       children: [
                         Icon(
-                          Icons.calendar_today, // Choose your preferred icon
+                          Icons.calendar_today,
                           color: Colors.grey[700],
-                          size: 18, // Adjust the size as needed
+                          size: 18,
                         ),
                         const SizedBox(width: 4),
                         Text(
@@ -328,43 +296,6 @@ class _UserPekaPageFEState extends State<UserPekaPageFE> {
               );
             },
           );
-        },
-      ),
-      floatingActionButton: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          FloatingActionButton.extended(
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => const UserFormPage0FE()),
-              );
-            },
-            label: const Text('Tambah PEKA'),
-            icon: const Icon(Icons.add),
-            backgroundColor: Colors.red,
-          ),
-        ],
-      ),
-      floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
-      bottomNavigationBar: BottomNavigationBar(
-        items: const [
-          BottomNavigationBarItem(
-            icon: Icon(Icons.dashboard),
-            label: 'Dashboard',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.folder),
-            label: 'PEKA',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.person),
-            label: 'Profile',
-          ),
-        ],
-        currentIndex: globalState.selectedIndex,
-        onTap: (index) {
-          globalState.onItemTapped(index, context);
         },
       ),
     );

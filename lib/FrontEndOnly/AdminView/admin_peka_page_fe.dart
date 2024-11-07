@@ -9,9 +9,9 @@ import 'package:provider/provider.dart';
 import 'package:http/http.dart' as http;
 
 class TindakLanjutPageFE extends StatefulWidget {
-  final String? statusFilter; // Optional filter for status
+  final List<dynamic>? tindakLanjutIds;
 
-  const TindakLanjutPageFE({super.key, this.statusFilter}); // Accept the filter in the constructor
+  const TindakLanjutPageFE({super.key, this.tindakLanjutIds}); // Accept the filter in the constructor
 
   @override
   State<TindakLanjutPageFE> createState() => _TindakLanjutPageFEState();
@@ -56,21 +56,25 @@ class _TindakLanjutPageFEState extends State<TindakLanjutPageFE> {
             'created_at': DateTime.parse(item['created_at']),
             'tanggal': dateFormat.format(DateTime.parse(item['tanggal'])),
             'status': item['status'],
-            'tipe': item['tipe'].toString(),
+            'tipe': item['tipe_observasi_id'].toString(),
             'img': item['img'],
             'tanggal_akhir': item['tanggal_akhir'],
+            'lokasi': item['lokasi_id'].toString(),
+            'detail_lokasi': item['detail_lokasi'],
+            'kategori': item['kategori_id'].toString(),
+            'clsr': item['clsr_id'].toString(),
+            'direct_action': item['direct_action'],
+            'non_clsr': item['non_clsr'],
+            'follow_up': item['follow_up']
           };
         }).toList();
-
-        // If a status filter is provided, filter the tindaklanjuts
-        if (widget.statusFilter != null) {
-          tindaklanjuts = tindaklanjuts
-              .where((item) => item['status'] == widget.statusFilter)
-              .toList();
+        // Try filtering again, printing ID types for each entry
+        if (widget.tindakLanjutIds != null) {
+          tindaklanjuts = tindaklanjuts.where((item) {
+            bool matches = widget.tindakLanjutIds!.contains(int.tryParse(item['id']) ?? -1);
+            return matches;
+          }).toList();
         }
-
-        // Sort by 'created_at'
-        tindaklanjuts.sort((a, b) => b['created_at'].compareTo(a['created_at']));
 
         return tindaklanjuts;
       } else {
@@ -82,6 +86,7 @@ class _TindakLanjutPageFEState extends State<TindakLanjutPageFE> {
     }
   }
 
+
   @override
   Widget build(BuildContext context) {
     final globalState = Provider.of<GlobalStateFE>(context);
@@ -89,7 +94,12 @@ class _TindakLanjutPageFEState extends State<TindakLanjutPageFE> {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.blue[400],
-        title: const Text('Daftar PEKA Saya FE', textAlign: TextAlign.center),
+        title: const Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Text('Daftar PEKA Saya FE', textAlign: TextAlign.center),
+          ],
+        ),
         automaticallyImplyLeading: false,
       ),
       body: FutureBuilder<List<Map<String, dynamic>>>(
@@ -113,16 +123,18 @@ class _TindakLanjutPageFEState extends State<TindakLanjutPageFE> {
             padding: const EdgeInsets.all(16.0),
             itemCount: tindaklanjuts.length,
             itemBuilder: (context, index) {
-              var tindaklanjut = tindaklanjuts[index];
+              var selectedTindaklanjut = tindaklanjuts[index];
 
               return InkWell(
                 onTap: () {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (context) => TindaklanjutDetailPage(tindaklanjut: tindaklanjut),
+                      builder: (context) => TindaklanjutDetailPage(tindaklanjut: tindaklanjuts[index]),
                     ),
                   );
+
+
                 },
                 child: Container(
                   padding: const EdgeInsets.all(16.0),
@@ -138,7 +150,15 @@ class _TindakLanjutPageFEState extends State<TindakLanjutPageFE> {
                       Row(
                         children: [
                           Text(
-                            '${tindaklanjut['deskripsi']}',
+                            '${selectedTindaklanjut['deskripsi']}',
+                            style: const TextStyle(fontSize: 16),
+                          ),
+                        ],
+                      ),
+                      Row(
+                        children: [
+                          Text(
+                            'Status : ${selectedTindaklanjut['status']}',
                             style: const TextStyle(fontSize: 16),
                           ),
                         ],
@@ -147,7 +167,7 @@ class _TindakLanjutPageFEState extends State<TindakLanjutPageFE> {
                       Row(
                         children: [
                           Text(
-                            'Tanggal Akhir Tindak Lanjut : ${tindaklanjut['tanggal_akhir'] ?? '-'}',
+                            'Tanggal Akhir Tindak Lanjut : ${selectedTindaklanjut['tanggal_akhir'] ?? '-'}',
                             style: const TextStyle(fontSize: 16),
                           ),
                         ],
@@ -162,7 +182,7 @@ class _TindakLanjutPageFEState extends State<TindakLanjutPageFE> {
                           ),
                           const SizedBox(width: 4),
                           Text(
-                            tindaklanjut['created_at'].toString(),
+                              DateFormat('dd/MM/yyyy HH:mm:ss').format(selectedTindaklanjut['created_at']).toString(),
                             style: TextStyle(
                               fontSize: 16,
                               color: Colors.grey[700],

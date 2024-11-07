@@ -17,7 +17,7 @@ class _UserFormPage3FEState extends State<UserFormPage3FE> {
 
   final TextEditingController _deskripsiObservasi = TextEditingController(); // For second question (text input)
   final TextEditingController _directAction = TextEditingController();
-  final TextEditingController _saranAplikasi = TextEditingController();
+
   final _formKey = GlobalKey<FormState>();
   File? _image;
   // Create an instance of the controller
@@ -25,7 +25,6 @@ class _UserFormPage3FEState extends State<UserFormPage3FE> {
 
   bool _deskripsiObservasiError = false;
   bool _directActionError = false;
-  bool _saranAplikasiError = false;
 
   @override
   void initState() {
@@ -38,10 +37,6 @@ class _UserFormPage3FEState extends State<UserFormPage3FE> {
       Provider.of<GlobalStateFE>(context, listen: false)
           .updatedirectAction(_directAction.text);
     });
-    _saranAplikasi.addListener(() {
-      Provider.of<GlobalStateFE>(context, listen: false)
-          .updatesaranAplikasi(_saranAplikasi.text);
-    });
   }
 
 
@@ -53,56 +48,61 @@ class _UserFormPage3FEState extends State<UserFormPage3FE> {
       // Validate each field
       _deskripsiObservasiError = globalState.deskripsiObservasi.isEmpty;
       _directActionError = globalState.directAction.isEmpty;
-      _saranAplikasiError = globalState.saranAplikasi.isEmpty;
 
     });
 
     // If all fields are valid, proceed to the next page
     if (!_deskripsiObservasiError &&
-        !_directActionError &&
-        !_saranAplikasiError) {
+        !_directActionError ) {
       try {
-        if (_formKey.currentState!.validate()) {
-          await _laporanPekaController.submitLaporan(
-            namaPegawai: globalState.namaPegawai.trim(),
-            emailPegawai: globalState.emailPekerja.trim(),
-            namaFungsi: globalState.namaFungsi.trim(),
-            lokasiSpesifik: globalState.lokasiSpesifik.trim(),
-            deskripsiObservasi: globalState.deskripsiObservasi.trim(),
-            directAction: globalState.directAction.trim(),
-            saranAplikasi: globalState.saranAplikasi.trim(),
-            tanggal: globalState.selectedTanggal!.toIso8601String(),
-            userId: globalState.userId!.toString(),
-            lokasiId: globalState.selectedLokasiId!.toString(),
-            tipeobservasiId: globalState.selectedTipeObservasiId!.toString(),
-            kategoriId: globalState.selectedSubKategoriId!.toString(),
-            clsrId: globalState.selectedClsrId!.toString(),
-            image: _image,
-          );
+        if(globalState.selectedClsrId != '450') {
+          if (_formKey.currentState!.validate()) {
+            await _laporanPekaController.submitLaporan(
+              namaPegawai: globalState.namaPegawai.trim(),
+              emailPegawai: globalState.emailPekerja.trim(),
+              namaFungsi: globalState.namaFungsi.trim(),
+              lokasiSpesifik: globalState.lokasiSpesifik.trim(),
+              deskripsiObservasi: globalState.deskripsiObservasi.trim(),
+              directAction: globalState.directAction.trim(),
+              tanggal: globalState.selectedTanggal!.toIso8601String(),
+              userId: globalState.userId!.toString(),
+              lokasiId: globalState.selectedLokasiId!.toString(),
+              tipeobservasiId: globalState.selectedTipeObservasiId!.toString(),
+              kategoriId: globalState.selectedSubKategoriId!.toString(),
+              clsrId: globalState.selectedClsrId!.toString(),
+              image: _image,
+              nonClsr: 'No',
+            );
+          }
+        }
+
+        if(globalState.selectedClsrId == '450') {
+          if (_formKey.currentState!.validate()) {
+            await _laporanPekaController.submitLaporan(
+              namaPegawai: globalState.namaPegawai.trim(),
+              emailPegawai: globalState.emailPekerja.trim(),
+              namaFungsi: globalState.namaFungsi.trim(),
+              lokasiSpesifik: globalState.lokasiSpesifik.trim(),
+              deskripsiObservasi: globalState.deskripsiObservasi.trim(),
+              directAction: globalState.directAction.trim(),
+              tanggal: globalState.selectedTanggal!.toIso8601String(),
+              userId: globalState.userId!.toString(),
+              lokasiId: globalState.selectedLokasiId!.toString(),
+              tipeobservasiId: globalState.selectedTipeObservasiId!.toString(),
+              kategoriId: globalState.selectedSubKategoriId!.toString(),
+              clsrId: globalState.selectedClsrId!.toString(),
+              image: _image,
+              nonClsr: globalState.selectedNonClsr.toString(),
+            );
+          }
         }
 
         // On successful submission, show a success message or navigate to another screen
         ScaffoldMessenger.of(context).showSnackBar(
            const SnackBar(content: Text("Submission Successful ")),
         );
-        // Reset the form fields
 
-        // print(globalState.userId);
-        // print(globalState.namaPegawai);
-        // print(globalState.emailPekerja);
-        // print(globalState.namaFungsi);
-        // print(globalState.selectedTanggal);
-        // print(globalState.selectedLokasiId);
-        // print(globalState.lokasiSpesifik);
-        // print(globalState.selectedTipeObservasiId);
-        // print(globalState.selectedSubKategoriId);
-        // print(globalState.selectedClsrId);
-        // print(globalState.deskripsiObservasi);
-        // print(globalState.directAction);
-        // print(globalState.saranAplikasi);
       } catch (error) {
-        // If an error occurs during submission, show an error message
-        print(error);
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text("Error: ${error.toString()}")),
         );
@@ -185,13 +185,6 @@ class _UserFormPage3FEState extends State<UserFormPage3FE> {
                   ),
                 ),
                 const SizedBox(height: 20),
-                _buildTextFieldContainer(
-                  label: 'Berikan saran anda untuk penggunaan Aplikasi ini',
-                  isError: _saranAplikasiError,
-                  controller: _saranAplikasi,
-                  errorMessage: 'Saran Aplikasi wajib diisi.',
-                ),
-                const SizedBox(height: 20.0),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.end,
                   children: [
@@ -241,8 +234,12 @@ class _UserFormPage3FEState extends State<UserFormPage3FE> {
       setState(() {
         _image = File(pickedFile.path);
       });
+
+      // Save the picked image in GlobalStateFE
+      Provider.of<GlobalStateFE>(context, listen: false).updateImage(_image);
     }
   }
+
 
 }
 
@@ -282,8 +279,12 @@ Widget _buildTextFieldContainer({
         TextField(
           controller: controller,
           decoration: InputDecoration(
-            labelText: hint ?? 'Enter text',
+            hintText: hint ?? 'Enter text',
+            hintMaxLines: 3,  // Allows hint text to span multiple lines
+            isDense: true,  // Reduces the default vertical space
+            contentPadding: const EdgeInsets.symmetric(vertical: 10.0, horizontal: 12.0), // Adjusts the padding inside the TextField
             errorText: isError ? errorMessage : null,
+
           ),
         ),
       ],

@@ -55,7 +55,7 @@ class GlobalStateFE with ChangeNotifier {
   String lokasiSpesifik = '';
   String deskripsiObservasi = '';
   String directAction = '';
-  String saranAplikasi = '';
+
 
 
   String? selectedKategori;
@@ -66,7 +66,9 @@ class GlobalStateFE with ChangeNotifier {
   String? _selectedSubKategoriId;
   String? _selectedClsr = '';
   String? _selectedLokasiId = '';
+  String? _selectedNonCLSR = '';
 
+  String? get selectedNonClsr => _selectedNonCLSR;
   String? get selectedLokasiId => _selectedLokasiId;
   String? get selectedClsrId => _selectedClsr;
   String? get selectedTipeObservasiId => _selectedTipeObservasiId;
@@ -80,12 +82,10 @@ class GlobalStateFE with ChangeNotifier {
     _userId = value;  // 'userID' should match the key used when storing the ID
     notifyListeners();  // Notify UI that userID has been updated
   }
-  File? _uploadedImage;
+  File? image;
 
-  File? get uploadedImage => _uploadedImage;
-
-  void updateUploadedImage(File? image) {
-    _uploadedImage = image;
+  void updateImage(File? newImage) {
+    image = newImage;
     notifyListeners();
   }
 
@@ -118,6 +118,11 @@ class GlobalStateFE with ChangeNotifier {
     notifyListeners();
   }
 
+  void updateNonClsr(String? nonClsr) {
+    _selectedNonCLSR = nonClsr;
+    notifyListeners();
+  }
+
   void updateNamaPegawai(String value) {
     namaPegawai = value;
     notifyListeners();
@@ -143,10 +148,7 @@ class GlobalStateFE with ChangeNotifier {
     notifyListeners();
   }
 
-  void updatesaranAplikasi(String value) {
-    saranAplikasi = value;
-    notifyListeners();
-  }
+
 
   void updateLokasiSpesifik(String value) {
     lokasiSpesifik = value;
@@ -162,8 +164,8 @@ class GlobalStateFE with ChangeNotifier {
     lokasiSpesifik = '';
     deskripsiObservasi = '';
     directAction = '';
-    saranAplikasi = '';
     selectedKategori = null;
+    _selectedNonCLSR = '';
     selectedTanggal = DateTime.now();
     _selectedLokasiId = null;
     _selectedTipeObservasiId = null;

@@ -62,9 +62,7 @@ class _UserFormPage0FEState extends State<UserFormPage0FE> {
       globalState.updateNamaFungsi(userFungsiD);
 
       // Set the default date to today if no date has been selected
-      if (globalState.selectedTanggal == null) {
-        globalState.selectedTanggal = DateTime.now();
-      }
+      globalState.selectedTanggal ??= DateTime.now();
 
       // Fetch Lokasi without calling setState in the callback
       fetchLokasi().then((data) {
@@ -103,7 +101,7 @@ class _UserFormPage0FEState extends State<UserFormPage0FE> {
       context: context,
       initialDate: globalState.selectedTanggal ?? DateTime.now(),
       firstDate: DateTime(2000),
-      lastDate: DateTime(2100),
+      lastDate: DateTime.now(), // Restrict tomorrow
     );
     if (pickedDate != null && pickedDate != globalState.selectedTanggal) {
       setState(() {
