@@ -251,7 +251,7 @@ class _UserHomePageFEState extends State<UserHomePageFE> {
                         ),
                         const SizedBox(height: 16),
                         const Text(
-                          'Peka Saya FE',
+                          'Peka Saya',
                           style: TextStyle(
                             fontSize: 20,
                             fontWeight: FontWeight.bold,

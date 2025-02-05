@@ -26,7 +26,7 @@ class _HomePageStateFE extends State<HomePageFE> {
             Text('$token'),
             ElevatedButton(
               onPressed: () async {
-                await _authenticationController.logout();
+                await _authenticationController.logoutAll();
               },
               style: ElevatedButton.styleFrom(
                 padding: EdgeInsets.zero,

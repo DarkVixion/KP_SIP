@@ -411,7 +411,7 @@ class _AdminHomePageFEState extends State<AdminHomePageFE> {
       builder: (context, snapshot) {
         return Scaffold(
           appBar: AppBar(
-            title: const Text('Admin Dashboard FE'),
+            title: const Text('Admin Dashboard'),
             actions: [
               IconButton(
                 onPressed: () {

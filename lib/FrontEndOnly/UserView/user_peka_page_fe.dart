@@ -179,7 +179,7 @@ class _UserPekaPageFEState extends State<UserPekaPageFE> {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.blue[400],
-        title: const Text('Daftar PEKA Saya FE', textAlign: TextAlign.center),
+        title: const Text('Daftar PEKA Saya', textAlign: TextAlign.center),
         automaticallyImplyLeading: false,
       ),
       body: FutureBuilder<List<Map<String, dynamic>>>(
@@ -285,7 +285,7 @@ class _UserPekaPageFEState extends State<UserPekaPageFE> {
                         ),
                         const SizedBox(width: 8),
                         Text(
-                          status ?? 'Unknown',
+                          (status == null || status.trim().isEmpty) ? '-' : status,
                           style: const TextStyle(fontSize: 16, color: Colors.green),
                         ),
                       ],
@@ -299,7 +299,7 @@ class _UserPekaPageFEState extends State<UserPekaPageFE> {
                         ),
                         const SizedBox(width: 8),
                         Text(
-                          followUp ?? 'Unknown',
+                          (followUp == null || followUp.trim().isEmpty) ? '-' : followUp,
                           style: const TextStyle(fontSize: 16, color: Colors.green),
                         ),
                       ],

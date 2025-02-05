@@ -97,7 +97,7 @@ class _TindakLanjutPageFEState extends State<TindakLanjutPageFE> {
         title: const Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Text('Daftar PEKA Saya FE', textAlign: TextAlign.center),
+            Text('Daftar PEKA Saya ', textAlign: TextAlign.center),
           ],
         ),
         automaticallyImplyLeading: false,

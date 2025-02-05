@@ -21,6 +21,10 @@ class MainPageFE extends StatelessWidget {
         // Get.offAll(() => const ProfilePageFE());
         // If token exists, navigate to HomePage
         var userRole = box.read('userRole');
+        // Set default role to 'User' if userRole is null or empty
+        if (userRole == null || userRole.isEmpty) {
+          userRole = 'User';
+        }
         if (userRole == 'Admin') {
           Get.offAll(() => const AdminHomePageFE());
         } else if (userRole == 'User') {

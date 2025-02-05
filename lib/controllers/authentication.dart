@@ -6,9 +6,11 @@ import 'package:fluttersip/constants/constants.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:http/http.dart' as http;
+import 'package:dio/dio.dart';
 
 class AuthenticationController extends GetxController{
   final isLoading = false.obs;
+  final Dio dio = Dio();
   final token = ''.obs;
   final userName = ''.obs;
   final userEmail = ''.obs;
@@ -17,61 +19,140 @@ class AuthenticationController extends GetxController{
   final userFungsiD = ''.obs;  // For storing the fungsi name
   final userFungsiJ = ''.obs;
   final box = GetStorage();
-  Future login({
-    required String email,
+  Future<void> LoginSSO({
+    required String username,
     required String password,
-  }) async{
-    try{
-      isLoading.value =true;
-      var data ={
-        'email': email,
-        'password': password,
-      };
+  }) async {
+    try {
+      isLoading.value = true;
 
-      var response = await http.post(
-        Uri.parse('${url}login'),
-        headers: {
-          'Accept':'application/json',
+      var response = await dio.post(
+        'https://sso.universitaspertamina.ac.id/api/login',
+        options: Options(headers: {'Accept': 'application/json'}),
+        data: {
+          'username': username,
+          'password': password,
         },
-        body: data,
       );
 
-      if(response.statusCode == 200){
-        isLoading.value = false;
-        token.value = json.decode(response.body)['token'];
-        userName.value = json.decode(response.body)['user']['name'].toString(); // Assuming the API returns user data
-        userEmail.value = json.decode(response.body)['user']['email'].toString();
-        userID.value = json.decode(response.body)['user']['id'].toString();
-        var roleId = json.decode(response.body)['user']['role_id'];
-        var fungsiId = json.decode(response.body)['user']['fungsi_id'];
+      if (response.statusCode == 200 && response.data['status'] == true) {
+        var userData = response.data['data'];
 
+        // Simpan data tanpa 'isSSO'
+        box.write('token', userData['token']);
+        box.write('userID', userData['id'].toString());
+        box.write('userCode', userData['code']);
+        box.write('userUsername', userData['username']);
+        box.write('userName', userData['name']);
+        box.write('userEmail', userData['alt_email']);
 
-        box.write('token', token.value);
-        box.write('userName', userName.value);
-        box.write('userEmail', userEmail.value);
-        box.write('userID', userID.value);
-
-        // Fetch role and fungsi
-        await fetchRole(roleId);
-        await fetchFungsi(fungsiId);
-
-        Get.offAll(() => MainPageFE());
-      }else{
-        isLoading.value = false;
         Get.snackbar(
-            'error',
-            json.decode(response.body)['Pesan'],
-            snackPosition: SnackPosition.TOP,
-            backgroundColor: Colors.red,
-            colorText: Colors.white,
+          'Login Berhasil',
+          'Selamat datang, ${userData['name']}!',
+          snackPosition: SnackPosition.TOP,
+          backgroundColor: Colors.green,
+          colorText: Colors.white,
         );
-        print(json.decode(response.body));
+        // Redirect ke halaman utama
+        Get.offAll(() => MainPageFE());
+      } else {
+        Get.snackbar(
+          'Login Gagal',
+          response.data['message'] ?? 'Periksa kembali username dan password!',
+          snackPosition: SnackPosition.TOP,
+          backgroundColor: Colors.red,
+          colorText: Colors.white,
+        );
       }
-    } catch(e){
+    } on DioException catch (e) {
+      Get.snackbar(
+        'Login Error',
+        e.response?.data['message'] ?? 'Terjadi kesalahan saat login!',
+        snackPosition: SnackPosition.TOP,
+        backgroundColor: Colors.red,
+        colorText: Colors.white,
+      );
+      print("Login SSO Error: ${e.message}");
+    } finally {
       isLoading.value = false;
-      print(e.toString());
     }
   }
+
+
+  Future<void> LoginLaravel({
+    required String email,
+    required String password,
+  }) async {
+    try {
+      isLoading.value = true;
+
+      var response = await dio.post(
+        '${url}login',
+        options: Options(headers: {'Accept': 'application/json'},
+          validateStatus: (status) {
+            // Jangan lemparkan exception untuk status 401
+            return status! < 500; // Semua status di bawah 500 diterima
+          },),
+        data: {'email': email, 'password': password},
+      );
+
+      if (response.statusCode == 200) {
+        var responseBody = response.data;
+        var user = responseBody['user'];
+
+        // Simpan data ke GetStorage
+        box.write('token', responseBody['token']);
+        box.write('userID', user['id'].toString());
+        box.write('userName', user['name']);
+        box.write('userEmail', user['email']);
+        box.write('isSSO', false); // Tandai login via Laravel API
+
+        // Update variabel agar UI langsung berubah
+        token.value = responseBody['token'];
+        userID.value = user['id'].toString();
+        userName.value = user['name'];
+        userEmail.value = user['email'];
+
+        // Fetch role dan fungsi
+        await fetchRole(user['role_id']);
+        await fetchFungsi(user['fungsi_id']);
+
+        Get.snackbar(
+          'Login Berhasil',
+          'Selamat datang, ${user['name']}!',
+          snackPosition: SnackPosition.TOP,
+          backgroundColor: Colors.green,
+          colorText: Colors.white,
+        );
+        // Arahkan ke halaman utama
+        Get.offAll(() => MainPageFE());
+      } else if (response.statusCode == 401) {
+        // Tangani login gagal
+        Get.snackbar(
+          'Login Gagal',
+          response.data['Pesan'] ?? 'Login gagal!',
+          snackPosition: SnackPosition.TOP,
+          backgroundColor: Colors.red,
+          colorText: Colors.white,
+        );
+      } else {
+        // Tangani error lain
+        Get.snackbar(
+          'Login Error',
+          'Terjadi kesalahan saat login.',
+          snackPosition: SnackPosition.TOP,
+          backgroundColor: Colors.red,
+          colorText: Colors.white,
+        );
+      }
+    } catch (e) {
+      print("Login Laravel Error: ${e.toString()}");
+    } finally {
+      isLoading.value = false;
+    }
+  }
+
+
 
   Future<void> fetchRole(int roleId) async {
     try {
@@ -119,49 +200,47 @@ class AuthenticationController extends GetxController{
     }
   }
 
-  Future logout() async {
+  Future<void> logoutAll() async {
     try {
       isLoading.value = true;
-      var storedToken = box.read('token');
-      // Call the logout API route
-      var response = await http.post(
-        Uri.parse('${url}logout'),
-        headers: {
-          'Accept': 'application/json',
-          'Authorization': 'Bearer $storedToken', // Include the token
-        },
-      );
 
-      if (response.statusCode == 201) {
-        // Clear the token from GetStorage
-        box.remove('token');
-        box.remove('userName');
-        box.remove('userEmail');
-        box.remove('userRole');
-        box.remove('userFungsi');
-        box.remove('userID');
-        token.value = '';
-        userName.value = '';
-        userEmail.value = '';
-        userRole.value = '';
-        userID.value = '';
-        userFungsiD.value = '';
-        // Redirect the user to the login screen (or another appropriate page)
-        Get.offAll(() => const LoginPageFE());
-      } else {
-        Get.snackbar(
-          'Error',
-          'Logout failed. Please try again.',
-          snackPosition: SnackPosition.TOP,
-          backgroundColor: Colors.red,
-          colorText: Colors.white,
+      bool? isSSO = box.read('isSSO'); // Laravel login akan menyimpan isSSO, SSO tidak
+
+      if (isSSO != null && isSSO == true) {
+        // Jika Laravel, lakukan request logout ke backend
+        var storedToken = box.read('token');
+        var response = await dio.post(
+          '${url}logout',
+          options: Options(
+            headers: {
+              'Accept': 'application/json',
+              'Authorization': 'Bearer $storedToken',
+            },
+          ),
         );
-        print('Logout Error: ${response.body}');
+
+        if (response.statusCode == 201) {
+          print('Logout Laravel berhasil');
+        }
       }
+
+      // Hapus semua data sesi
+      box.erase();
+
+      // Menampilkan snackbar berhasil logout
+      Get.snackbar(
+        'Logout Berhasil',
+        'Anda telah berhasil keluar.',
+        snackPosition: SnackPosition.TOP,
+        backgroundColor: Colors.green,
+        colorText: Colors.white,
+      );
+      Get.offAll(() => const LoginPageFE());
     } catch (e) {
-      print(e.toString());
+      print("Logout Error: ${e.toString()}");
     } finally {
       isLoading.value = false;
     }
   }
+
 }

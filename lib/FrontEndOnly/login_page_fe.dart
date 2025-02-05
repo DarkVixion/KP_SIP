@@ -1,6 +1,6 @@
 
 import 'package:flutter/material.dart';
-import 'package:fluttersip/FrontEndOnly/forgot_pw_page_fe.dart';
+import 'package:fluttersip/FrontEndOnly/login_page_SSO_fe.dart';
 import 'package:fluttersip/controllers/authentication.dart';
 import 'package:get/get.dart';
 
@@ -13,6 +13,7 @@ class LoginPageFE extends StatefulWidget {
 
 class _LoginPageFEState extends State<LoginPageFE> {
   final TextEditingController _emailController = TextEditingController();
+  final TextEditingController _usernameController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
   final AuthenticationController _authenticationController = Get.put(AuthenticationController());
 
@@ -38,7 +39,7 @@ class _LoginPageFEState extends State<LoginPageFE> {
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 const Text(
-                  'PEKA UPER FE',
+                  'PEKA UPER',
                   style: TextStyle(
                     fontWeight: FontWeight.bold,
                     fontSize: 40,
@@ -100,7 +101,7 @@ class _LoginPageFEState extends State<LoginPageFE> {
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 25.0),
                   child: Row(
-                    mainAxisAlignment: MainAxisAlignment.end,
+                    mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       GestureDetector(
                         onTap: () {
@@ -108,13 +109,13 @@ class _LoginPageFEState extends State<LoginPageFE> {
                             context,
                             MaterialPageRoute(
                               builder: (context) {
-                                return const ForgotPasswordPageFE();
+                                return const LoginPageSSOFE();
                               },
                             ),
                           );
                         },
                         child: const Text(
-                          'Lupa Password?',
+                          'Login Pake SSO?',
                           style: TextStyle(
                             color: Colors.blue,
                             fontWeight: FontWeight.bold,
@@ -129,7 +130,7 @@ class _LoginPageFEState extends State<LoginPageFE> {
                   padding: const EdgeInsets.symmetric(horizontal: 130.0),
                   child: GestureDetector(
                     onTap: () async{
-                      await _authenticationController.login(
+                      await _authenticationController.LoginLaravel(
                           email: _emailController.text.trim(),
                           password: _passwordController.text.trim()
                       );
